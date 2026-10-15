@@ -2,3 +2,25 @@
 
 :root { color-scheme: dark; }
 body { background: #0b0f14; color: #e8f4f8; }
+
+label { display: block; margin: 0.5rem 0; font-size: 0.9rem; opacity: 0.9; }
+input, select, textarea {
+  display: block; width: 100%; margin-top: 0.25rem; padding: 0.5rem;
+  background: #131a22; color: #e8f4f8; border: 1px solid #263241; border-radius: 0.5rem;
+}
+button {
+  padding: 0.45rem 0.9rem; margin: 0.2rem 0.2rem 0.2rem 0; background: #1b2735; color: #e8f4f8;
+  border: 1px solid #2c3c50; border-radius: 0.5rem; cursor: pointer;
+}
+button:hover { background: #24334a; }
+h2 { margin: 1.2rem 0 0.4rem; font-size: 1rem; letter-spacing: 0.03em; opacity: 0.75; }
+ul { list-style: none; padding: 0; margin: 0.8rem 0; }
+li { padding: 0.45rem 0.6rem; margin-bottom: 0.3rem; background: #121a24; border-radius: 0.5rem; }
+.sekme { background: transparent; border-color: transparent; opacity: 0.6; }
+.sekme-acik { background: #1b2735; border-color: #2c3c50; opacity: 1; }
+.chip { border-radius: 999px; padding: 0.3rem 0.7rem; font-size: 0.85rem; opacity: 0.5; }
+.chip-acik { opacity: 1; border-color: #4ec9b0; background: #16302b; }
+.uyari {
+  padding: 0.7rem 0.9rem; margin-bottom: 0.8rem; background: #3a2a12;
+  border: 1px solid #7a5a1e; border-radius: 0.6rem;
+}

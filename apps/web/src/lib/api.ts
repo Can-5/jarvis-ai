@@ -16,6 +16,14 @@ export async function saveSettings(s: Record<string, string>) {
   const res = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s) });
   return json<{ ok: boolean }>(res);
 }
+export async function getStatus() {
+  const res = await fetch('/api/status');
+  return json<{ saglayici: string; model: string; ollamaModels: string[]; keys: Record<string, boolean> }>(res);
+}
+export async function getOllama() {
+  const res = await fetch('/api/ollama');
+  return json<{ models: string[] }>(res);
+}
 export async function saveKey(provider: string, key: string) {
   const res = await fetch('/api/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider, key }) });
   return json<{ ok: boolean }>(res);

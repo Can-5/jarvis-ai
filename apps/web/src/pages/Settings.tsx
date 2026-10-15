@@ -1,6 +1,6 @@
 // apps/web/src/pages/Settings.tsx
 import { useEffect, useState } from 'react';
-import { getSettings, saveSettings, saveKey, toggleTunnel } from '../lib/api.js';
+import { getSettings, getStatus, saveSettings, saveKey, toggleTunnel } from '../lib/api.js';
 
 const ROZETLER = ['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici'] as const;
 const SAGLAYICILAR = ['gemini', 'claude', 'openai', 'grok', 'openrouter'] as const;
@@ -10,9 +10,11 @@ export default function Settings() {
   const [keys, setKeys] = useState<Record<string, string>>({});
   const [profil, setProfil] = useState('');
   const [tunnelMsg, setTunnelMsg] = useState('');
+  const [durum, setDurum] = useState<{ saglayici: string; model: string; ollamaModels: string[]; keys: Record<string, boolean> } | null>(null);
 
   useEffect(() => {
     void getSettings().then(setS);
+    void getStatus().then(setDurum).catch(() => undefined);
     void fetch('/api/voice-profile/ilkaycan').then((r) => r.json())
       .then((p: { subs: Record<string, string> }) =>
         setProfil(Object.entries(p.subs ?? {}).map(([k, v]) => `${k}=${v}`).join('\n')))
@@ -45,9 +47,22 @@ export default function Settings() {
       </select></label>
       <label>konusma hizi<input type="number" step="0.1" min="0.5" max="2" value={s.tts_hiz ?? '1'} onChange={set('tts_hiz')} /></label>
 
+      <h2>model ve saglayici</h2>
+      <label>saglayici<select value={s.saglayici ?? 'ollama'} onChange={set('saglayici')}>
+        <option value="ollama">ollama (yerel, anahtar gerekmez)</option>
+        {SAGLAYICILAR.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select></label>
+      <label>model<input list="modeller" value={s.model ?? 'qwen3-coder:30b'} onChange={set('model')} /></label>
+      <datalist id="modeller">
+        {(durum?.ollamaModels ?? []).map((m) => <option key={m} value={m} />)}
+      </datalist>
+      <p>{durum && durum.saglayici === 'ollama' && durum.ollamaModels.length === 0
+        ? 'ollama da model yok — ya ollama kur ya yukaridan bulut saglayici sec'
+        : durum ? `aktif: ${durum.saglayici} / ${durum.model}` : ''}</p>
+
       <h2>api anahtarlari</h2>
       {SAGLAYICILAR.map((p) => (
-        <label key={p}>{p}<input type="password" placeholder="kayitli ise bos birak"
+        <label key={p}>{p}<input type="password" placeholder={durum?.keys?.[p] ? 'kayitli' : 'kayitli degil'}
           value={keys[p] ?? ''} onChange={(e) => setKeys((o) => ({ ...o, [p]: e.target.value }))} /></label>
       ))}
 

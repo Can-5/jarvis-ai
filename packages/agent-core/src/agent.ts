@@ -4,7 +4,7 @@ import { decide, isDangerous, snapshot, type Mode } from '@jarvis/guard';
 import { allTools } from '@jarvis/tools';
 import { complete as defaultComplete } from '@jarvis/llm';
 import { KeyStore } from '@jarvis/llm';
-import type { BadgeId, ChatMessage, ToolCall } from '@jarvis/shared';
+import type { BadgeId, ChatMessage, ProviderId, ToolCall } from '@jarvis/shared';
 
 export { BADGES };
 export interface VoiceProfile { subs: Record<string, string>; }
@@ -12,6 +12,7 @@ export interface TurnInput {
   text: string; badges: BadgeId[]; mode: Mode;
   approvals: { tool: string; ok: boolean }[];
   conv?: string; wsDir?: string;
+  provider: ProviderId; model: string;
 }
 export interface TurnResult {
   reply: string;
@@ -21,13 +22,14 @@ type Llm = { complete: typeof defaultComplete };
 
 export async function correctPeltek(
   raw: string, profile: VoiceProfile, last3: string[], llm: Llm,
+  provider: ProviderId = 'ollama', model = 'qwen3:8b',
 ): Promise<string> {
   let fixed = raw;
   for (const [from, to] of Object.entries(profile.subs)) fixed = fixed.split(from).join(to);
   if (fixed === raw) return raw;
   const ks = new KeyStore();
   const res = await llm.complete({
-    provider: 'ollama', model: 'qwen3:8b',
+    provider, model,
     messages: [{ role: 'system', content: 'Asagidaki cumleyi duzgun Turkceye cevir, sadece cumleyi yaz.', ts: 1 },
       { role: 'user', content: `DUZELT: ${fixed}\nBaglam: ${last3.join(' | ')}`, ts: 2 }],
   }, ks).catch(() => ({ text: fixed, toolCalls: [] }));
@@ -48,7 +50,7 @@ export async function runTurn(input: TurnInput, llm: Llm): Promise<TurnResult> {
   const ks = new KeyStore();
   for (let i = 0; i < 5; i++) {
     const res = await llm.complete({
-      provider: 'ollama', model: 'qwen3-coder:30b',
+      provider: input.provider, model: input.model,
       messages,
       tools: usable.map((t) => ({ name: t.name, describe: t.describe })),
     }, ks);

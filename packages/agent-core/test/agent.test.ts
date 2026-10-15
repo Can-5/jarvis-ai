@@ -34,12 +34,12 @@ describe('correctPeltek', () => {
 
 describe('runTurn', () => {
   it('L2 tool icin onay ister, calistirmaz', async () => {
-    const res = await runTurn({ text: 'dosya yaz', badges: ['kod'], mode: 'normal', approvals: [] }, fakeLlm as never);
+    const res = await runTurn({ text: 'dosya yaz', badges: ['kod'], mode: 'normal', approvals: [], provider: 'ollama', model: 'test-model' }, fakeLlm as never);
     expect(res.approvals).toHaveLength(1);
     expect(res.approvals[0]?.tool).toBe('fs_write');
   });
   it('duz metinde cevap doner', async () => {
-    const res = await runTurn({ text: 'selam', badges: ['chat'], mode: 'normal', approvals: [] }, fakeLlm as never);
+    const res = await runTurn({ text: 'selam', badges: ['chat'], mode: 'normal', approvals: [], provider: 'ollama', model: 'test-model' }, fakeLlm as never);
     expect(res.reply).toContain('merhaba');
   });
 });

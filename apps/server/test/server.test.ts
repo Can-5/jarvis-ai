@@ -20,6 +20,11 @@ describe('server', () => {
       payload: { conv: 'c1', text: 'selam', badges: ['chat'] } });
     expect(res.json()).toMatchObject({ reply: 'selam kanka' });
   });
+  it('status kurulum durumunu doner', async () => {
+    const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });
+    const res = await app.inject({ method: 'GET', url: '/api/status' });
+    expect(res.json()).toMatchObject({ saglayici: 'ollama', model: 'qwen3-coder:30b' });
+  });
   it('bot prizi kayit alir', () => {
     registerBot({ onText: async () => 'pong', onVoice: async () => 'ses-pong' });
     expect(getBot()).toBeDefined();

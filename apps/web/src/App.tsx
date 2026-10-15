@@ -8,10 +8,10 @@ export default function App() {
     <main className="min-h-screen bg-[#0b0f14] text-[#e8f4f8] p-4">
       <h1 className="text-2xl">JARVIS</h1>
       <nav>
-        <button onClick={() => setSayfa('sohbet')}>sohbet</button>
-        <button onClick={() => setSayfa('ayarlar')}>ayarlar</button>
+        <button className={sayfa === 'sohbet' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('sohbet')}>sohbet</button>
+        <button className={sayfa === 'ayarlar' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('ayarlar')}>ayarlar</button>
       </nav>
-      {sayfa === 'sohbet' ? <Chat /> : <Settings />}
+      {sayfa === 'sohbet' ? <Chat goSettings={() => setSayfa('ayarlar')} /> : <Settings />}
     </main>
   );
 }

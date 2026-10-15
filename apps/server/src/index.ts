@@ -8,7 +8,7 @@ import Database from 'better-sqlite3';
 import { join } from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { BadgeId, dataDir } from '@jarvis/shared';
+import { BadgeId, dataDir, type ProviderId } from '@jarvis/shared';
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
 
@@ -18,6 +18,10 @@ function settingsDb(): Database.Database {
   const db = new Database(join(dataDir(), 'jarvis.db'));
   db.exec('CREATE TABLE IF NOT EXISTS settings (k TEXT PRIMARY KEY, v TEXT)');
   return db;
+}
+function setting(db: Database.Database, k: string, fb: string): string {
+  const row = db.prepare('SELECT v FROM settings WHERE k = ?').get(k) as { v: string } | undefined;
+  return row?.v ?? fb;
 }
 
 export async function build(deps?: { llm?: { complete: typeof realComplete } }): Promise<FastifyInstance> {
@@ -30,6 +34,18 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
   app.get('/api/health', async () => ({ ok: true }));
   app.get('/api/ollama', async () => ({ models: await detectOllama() }));
 
+  app.get('/api/status', async () => {
+    const db = settingsDb();
+    const saglayici = setting(db, 'saglayici', 'ollama');
+    const model = setting(db, 'model', 'qwen3-coder:30b');
+    db.close();
+    const keys: Record<string, boolean> = {};
+    for (const p of ['gemini', 'claude', 'openai', 'grok', 'openrouter'] as const) {
+      keys[p] = (await ks.get(p).catch(() => null)) !== null;
+    }
+    return { saglayici, model, ollamaModels: await detectOllama().catch(() => []), keys };
+  });
+
   app.post('/api/chat', async (req) => {
     const body = z.object({ conv: z.string(), text: z.string(), badges: BadgeId.array().default(['chat']) }).parse(req.body);
     const history = mem.lastMessages(body.conv, 6).map((m) => `${m.role}: ${m.content}`);
@@ -38,21 +54,37 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     const kapali = new Set(
       body.badges.filter((b) => (db.prepare('SELECT v FROM settings WHERE k = ?').get(`rozet_${b}`) as { v: string } | undefined)?.v === 'kapali'),
     );
+    const provider = setting(db, 'saglayici', 'ollama') as ProviderId;
+    const model = setting(db, 'model', 'qwen3-coder:30b');
     db.close();
     const aktif = body.badges.filter((b) => !kapali.has(b));
-    const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [] }, llm);
-    mem.saveTurn(body.conv, body.text, res.reply);
-    return res;
+    try {
+      const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [], provider, model }, llm);
+      mem.saveTurn(body.conv, body.text, res.reply);
+      return res;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return { reply: `işlemedi kanka: ${msg}`, approvals: [] };
+    }
   });
 
   app.get('/ws/chat', { websocket: true }, (socket) => {
     socket.on('message', async (raw) => {
       const msg = JSON.parse(String(raw)) as { type: string; conv: string; text: string };
       if (msg.type !== 'user') return;
-      const res = await runTurn({ text: msg.text, badges: ['chat'], mode: 'normal', approvals: [] }, llm);
-      mem.saveTurn(msg.conv, msg.text, res.reply);
-      socket.send(JSON.stringify({ type: 'token', text: res.reply }));
-      for (const a of res.approvals) socket.send(JSON.stringify({ type: 'approval', ...a }));
+      const db = settingsDb();
+      const provider = setting(db, 'saglayici', 'ollama') as ProviderId;
+      const model = setting(db, 'model', 'qwen3-coder:30b');
+      db.close();
+      try {
+        const res = await runTurn({ text: msg.text, badges: ['chat'], mode: 'normal', approvals: [], provider, model }, llm);
+        mem.saveTurn(msg.conv, msg.text, res.reply);
+        socket.send(JSON.stringify({ type: 'token', text: res.reply }));
+        for (const a of res.approvals) socket.send(JSON.stringify({ type: 'approval', ...a }));
+      } catch (e) {
+        const err = e instanceof Error ? e.message : String(e);
+        socket.send(JSON.stringify({ type: 'token', text: `işlemedi kanka: ${err}` }));
+      }
       socket.send(JSON.stringify({ type: 'done' }));
     });
   });
