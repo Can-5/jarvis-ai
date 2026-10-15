@@ -9,7 +9,7 @@ DEFAULT_VOICE = "tr_TR-dfki-medium"
 
 
 def voice_dir() -> Path:
-    d = Path(os.getenv("JARVIS_DATA_DIR", Path(__file__).resolve().parents[2] / "data")) / "voices"
+    d = Path(os.getenv("JARVIS_DATA_DIR", Path(__file__).resolve().parents[3] / "data")) / "voices"
     d.mkdir(parents=True, exist_ok=True)
     return d
 

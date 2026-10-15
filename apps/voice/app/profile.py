@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def base() -> Path:
-    d = Path(os.getenv("JARVIS_DATA_DIR", Path(__file__).resolve().parents[2] / "data")) / "voice_profiles"
+    d = Path(os.getenv("JARVIS_DATA_DIR", Path(__file__).resolve().parents[3] / "data")) / "voice_profiles"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
