@@ -1,6 +1,8 @@
 // apps/server/src/index.ts
 import Fastify, { type FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
+import fastifyStatic from '@fastify/static';
+import { existsSync } from 'node:fs';
 import { z } from 'zod';
 import Database from 'better-sqlite3';
 import { join } from 'node:path';
@@ -120,6 +122,23 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     child.unref();
     return { ok: true, note: 'tunnel baslatildi, URL terminalde ve logda gorunur' };
   });
+
+  const here = new URL('.', import.meta.url).pathname;
+  const webDist = [
+    join(process.cwd(), 'apps/web/dist'),
+    join(process.cwd(), '..', 'web/dist'),
+    join(here, '..', '..', '..', 'web/dist'),
+    join(here, '..', '..', 'apps', 'web', 'dist'),
+  ].find((p) => existsSync(join(p, 'index.html')));
+  if (webDist) {
+    await app.register(fastifyStatic, { root: webDist });
+    app.setNotFoundHandler(async (req, reply) => {
+      if (req.url.startsWith('/api/') || req.url.startsWith('/ws')) {
+        return reply.code(404).send({ error: 'Not Found', statusCode: 404 });
+      }
+      return reply.sendFile('index.html');
+    });
+  }
 
   return app;
 }
