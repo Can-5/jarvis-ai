@@ -92,6 +92,11 @@ ses'teyken kod+chat vb.):
   tarama (tehlikeli pattern, secret sızıntısı, güvensiz header/kod, OWASP
   temel kontrolleri); (2) virüs/kötü dosya kontrolü — indirilen/üretilen
   dosyalar hash+imza kontrolü, şüpheli karantina + rapor.
+- **Ek rozetler (spec sonrası, kullanıcı onaylı):** Öğretmen 📚 (basit
+  anlatım, örnekle öğretir), Yazar ✍️ (yaratıcı yazı, düzeltme, üslup),
+  Planlayıcı 🗓️ (hatırlatıcı, not, günlük özet).
+- Rozetler ayarlardan aç/kapatılır; mimari yeni rozet eklemeye açıktır
+  (rozet = system prompt + tool seti + opsiyonel model override).
 
 Kademeler (her tool'un kademe etiketi olur): L1 salt-okur otomatik,
 L2 yazma/komut onaylı, L3 otonom (kullanıcı açmadıkça kapalı), tehlikeli
@@ -111,13 +116,18 @@ boruya, priz hazır).
 
 Ollama varsa yerel model, yoksa ilk açılışta anahtar ister. 4 sağlayıcı
 ayarlardan aç/kapat; anahtarlar `data/`da şifreli, git'e gitmez.
+**5. yol — OpenRouter (spec sonrası, kullanıcı onaylı):** opencode'da
+kullanılan modeller (muse-spark, nemotron serisi, minimax/step,
+space-bunny, big-pickle vb.) OpenRouter API anahtarı ile JARVIS'te de
+kullanılır. Ayarlardan sağlayıcı + serbest model ID seçilir (liste +
+manuel yazma); global varsayılan + rozet başına opsiyonel override.
+Not: ücretsiz (`:free`) modellerde rate-limit olabilir, arayüzde gösterilir.
 Çalışma alanı git deposu, her değişiklik öncesi otomatik snapshot + tek
 tıkla rollback. Okuma serbest, yazma/komut onaylı, tehlikeliler her sefer
 sorar. Ekran+fare+klavye tam ama aynı onay kademesine bağlı — kafasına
 göre tıklamaz.
 
 ## 8. Bölüm 5 — PWA ve Erişim ve GitHub (ONAYLI)
-
 PWA site gibi açılır, ana ekrana simge eklenir, mikrofon + bildirim
 çalışır, çevrimdışı açılır, bağlantı gelince senkron olur. Telegram Faz-2
 bu yapının üstüne prizden takılacak. Erişim: evde aynı Wi-Fi (LAN),
@@ -125,7 +135,23 @@ dışarıdaysa ayarlardan tek dokunuşla Cloudflare Tunnel (`https`).
 GitHub: `git init` + ilk commit'ler, `gh` ile `Can-5` hesabında repo açıp
 push. API anahtarlı `data/` klasörü `.gitignore` ile git dışı.
 
-## 9. Faz Planı
+## 9. Bölüm 6 — Kişiselleştirme ve Skill Sistemi (spec sonrası ek, ONAYLI)
+
+**Kişiselleştirme (Ayarlar sayfası):** asistan adı + uyanma sözü ("JARVIS"
+varsayılan, değiştirilebilir), sana nasıl hitap etsin (isim/lakap),
+üslup presetleri (samimi / resmi / kısa-öz / detaycı), tema (açık/koyu),
+TTS sesi + konuşma hızı, dil (Türkçe varsayılan), kullanıcı profili
+(tercihler, ilgi alanları — cevapları kişiselleştirir, ses profiliyle
+bağlantılı). Profil verisi `data/`da, git'e gitmez.
+
+**Skill sistemi (kurulabilir yetenekler):** `skills/` klasörü; her skill
+bir klasör + `SKILL.md` (ad, açıklama, sağladığı tool/komutlar).
+agent-core skill'i tool olarak yükler, ayarlardan aç/kapatılır.
+Skill'in tool'ları da L1/L2/L3 kademe etiketine tabidir (güvenlik dışı
+değil). Faz-1'de kurulum = klasörü kopyala + ayarlardan aç; URL/galeri
+ile tek tık kurulum Faz-2+ adayı.
+
+## 10. Faz Planı
 
 - **Faz-1:** çekirdek (ajan + ses + PWA + LAN + snapshot güvenliği),
   `apps/server` içinde sonradan takılacak `BotAdapter` prizi, mobil erişim
@@ -133,13 +159,13 @@ push. API anahtarlı `data/` klasörü `.gitignore` ile git dışı.
 - **Faz-2 (çekirdek bitince):** Telegram botu prize takılır (metin + sesli
   mesaj aynı boruya).
 
-## 10. Açık Noktalar
+## 11. Açık Noktalar
 
 - GitHub repo ismini kullanıcı söyleyecek (push zamanı).
 - Yerel model seçimi (Ollama + qwen3-coder vb.) implementasyonda netleşir.
 - Bulut STT/TTS sağlayıcı seçimi implementasyonda netleşir.
 
-## 11. Öz-inceleme (spec self-review)
+## 12. Öz-inceleme (spec self-review)
 
 - Placeholder yok (sürüm numaraları "vb." ile esnek bırakıldı, bilinçli).
 - Çelişki yok: Telegram Faz-2 / PWA Faz-1 her bölümde tutarlı; `data/`
