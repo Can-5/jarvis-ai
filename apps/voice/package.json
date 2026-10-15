@@ -1,0 +1,9 @@
+{
+  "name": "@jarvis/voice",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uv run uvicorn app.main:app --port 8765 --reload",
+    "test": "uv run pytest test/ -q"
+  }
+}

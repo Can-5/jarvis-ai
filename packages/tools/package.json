@@ -1,0 +1,21 @@
+{
+  "name": "@jarvis/tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p .",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jarvis/guard": "*",
+    "@jarvis/shared": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}

@@ -1,0 +1,20 @@
+[project]
+name = "jarvis-voice"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn>=0.34",
+  "faster-whisper>=1.1",
+  "piper-tts>=1.2",
+  "python-multipart>=0.0.18",
+  "httpx>=0.28",
+  "numpy>=2.5.4",
+  "nvidia-cublas-cu12>=12.9.2.10",
+  "nvidia-cudnn-cu12>=9.27.0.42",
+]
+[dependency-groups]
+dev = ["pytest>=8"]
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["."]

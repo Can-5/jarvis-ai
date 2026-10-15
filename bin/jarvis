@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# jarvis — JARVIS kisisel asistani baslat/durdur/durum.
+# Kullanim: jarvis {dev|start|stop|status|logs}
+set -euo pipefail
+cd "$(dirname "$0")/.."
+PIDDIR="$PWD/data"; mkdir -p "$PIDDIR"
+case "${1:-help}" in
+  dev) npm run dev ;;
+  start)
+    JARVIS_SERVE=1 nohup npm start -w apps/server > data/server.log 2>&1 & echo $! > data/server.pid
+    (cd apps/voice; nohup uv run uvicorn app.main:app --port 8765 > ../../data/voice.log 2>&1 & echo $! > ../../data/voice.pid)
+    echo "JARVIS baslatildi (server:3000, voice:8765)" ;;
+  stop) kill "$(cat data/server.pid)" 2>/dev/null; kill "$(cat data/voice.pid)" 2>/dev/null; echo durdu ;;
+  status) curl -sf localhost:3000/api/health && curl -sf localhost:8765/health && echo " ikisi de ayakta" ;;
+  logs) tail -n 50 -f data/server.log data/voice.log ;;
+  *) echo "kullanim: jarvis {dev|start|stop|status|logs}" ;;
+esac

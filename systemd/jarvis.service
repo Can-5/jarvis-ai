@@ -1,0 +1,11 @@
+[Unit]
+Description=JARVIS kisisel asistan
+After=network-online.target
+[Service]
+Type=simple
+WorkingDirectory=%h/Belgeler/Default Project/jarvis
+ExecStart=%h/Belgeler/Default Project/jarvis/bin/jarvis start
+ExecStop=%h/Belgeler/Default Project/jarvis/bin/jarvis stop
+Restart=on-failure
+[Install]
+WantedBy=default.target

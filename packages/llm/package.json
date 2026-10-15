@@ -1,0 +1,4 @@
+{ "name": "@jarvis/llm", "version": "0.1.0", "type": "module",
+  "main": "dist/src/index.js", "types": "dist/src/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.json", "test": "vitest run" },
+  "dependencies": { "@jarvis/shared": "0.1.0" } }

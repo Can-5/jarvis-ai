@@ -1,0 +1,31 @@
+{
+  "name": "@jarvis/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "start": "node dist/src/index.js",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/websocket": "^11.3.0",
+    "@jarvis/agent-core": "*",
+    "@jarvis/guard": "*",
+    "@jarvis/llm": "*",
+    "@jarvis/shared": "*",
+    "@jarvis/tools": "*",
+    "better-sqlite3": "^12.4.1",
+    "fastify": "^5.6.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  }
+}
