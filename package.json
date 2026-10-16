@@ -9,11 +9,14 @@
   "scripts": {
     "dev": "concurrently -n server,voice,web \"npm:dev -w apps/server\" \"npm:dev -w apps/voice\" \"npm:dev -w apps/web\"",
     "start": "npm:start -w apps/server",
+    "electron": "electron ./electron/main.cjs",
+    "electron:build": "npm run build -w apps/server && npm run build -w apps/web && electron ./electron/main.js",
     "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
     "concurrently": "^9.1.2",
+    "electron": "^44.8.0",
     "typescript": "^5.7.3",
     "vitest": "^3.2.4"
   }

@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg-deep: #0a0e1a;
-  --bg-panel: rgba(10, 20, 40, 0.55);
+  --bg-deep: #06080c;
+  --bg-panel: rgba(10, 18, 32, 0.6);
   --neon-cyan: #00d4ff;
   --neon-teal: #00b4d8;
-  --text-primary: #e0f2f1;
+  --neon-amber: #ffab00;
+  --text-primary: #e8f4f8;
   --text-secondary: #607d8b;
-  --panel-border: 1px solid rgba(0, 212, 255, 0.15);
-  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.1);
-  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --panel-border: 1px solid rgba(0, 212, 255, 0.2);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.35), 0 0 50px rgba(0, 212, 255, 0.15);
+  --glow-amber: 0 0 20px rgba(255, 171, 0, 0.35);
+  --font-display: 'Outfit', system-ui, -apple-system, 'Segoe UI', 'DejaVu Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'DejaVu Sans Mono', monospace;
 }
 
 * { box-sizing: border-box; }
@@ -22,6 +24,7 @@ html, body, #root {
   color: var(--text-primary);
   font-family: var(--font-display);
   color-scheme: dark;
+  overflow-x: hidden;
 }
 
 /* Grid arka plan + scanline overlay (HUD hissi) */
@@ -203,6 +206,37 @@ button:active { transform: translateY(1px); }
   opacity: 1;
   color: var(--neon-cyan);
   text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Mod başlık + durum */
+.rozet-baslik {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--neon-teal);
+  opacity: 0.8;
+  margin-right: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.durum-cipi {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid var(--neon-cyan);
+  border-radius: 0.5rem;
+  color: var(--neon-cyan);
+  margin-left: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+/* Öğretmen modu özel vurgusu */
+.chip-ogretmen {
+  border-color: var(--neon-amber) !important;
+  color: var(--neon-amber) !important;
+  background: rgba(255, 171, 0, 0.15) !important;
+  box-shadow: 0 0 15px rgba(255, 171, 0, 0.25) !important;
 }
 
 /* Chips */

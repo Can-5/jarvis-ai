@@ -6,7 +6,7 @@ import { getStatus, type Badge } from '../lib/api.js';
 const ROZETLER: { id: Badge; ad: string }[] = [
   { id: 'chat', ad: '💬 sohbet' }, { id: 'ses', ad: '🎤 ses' }, { id: 'kod', ad: '⌨️ kod' },
   { id: 'arastirma', ad: '🔍 arastirma' }, { id: 'siber', ad: '🛡️ siber' },
-  { id: 'ogretmen', ad: '📚 ogretmen' }, { id: 'yazar', ad: '✍️ yazar' }, { id: 'planlayici', ad: '🗓️ planlayici' },
+  { id: 'ogretmen', ad: '📚 öğretmen' }, { id: 'yazar', ad: '✍️ yazar' }, { id: 'planlayici', ad: '🗓️ planlayici' },
 ];
 
 export default function Chat({ goSettings }: { goSettings?: () => void }) {
@@ -64,12 +64,20 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
           {goSettings && <button onClick={goSettings}>ayarlara git</button>}
         </div>
       )}
+      {badges.includes('ogretmen') && (
+        <div className="uyari" style={{ borderColor: 'var(--neon-amber)', color: 'var(--neon-amber)' }}>
+          📚 Öğretmen modu etkin — basit anlatırım, örnek veririm, sona küçük bir soru sorarım. Ne öğrenmek istersin?
+          <button style={{ marginTop: '0.5rem', background: 'rgba(255,171,0,0.15)', borderColor: 'var(--neon-amber)', color: 'var(--neon-amber)' }} onClick={() => void send('merhaba, öğretmen modunda nasıl çalışırım?', ['ogretmen'])}>örnek sor</button>
+        </div>
+      )}
       {offline && <p>cevrimdisisin — mesajlar baglanti gelince gonderilecek</p>}
       <div className="rozetler">
+        <span className="rozet-baslik">MOD:</span>
         {ROZETLER.map((r) => (
-          <button key={r.id} className={`chip${badges.includes(r.id) ? ' chip-acik' : ''}`}
+          <button key={r.id} className={`chip${badges.includes(r.id) ? ' chip-acik' : ''}${badges.includes(r.id) && r.id === 'ogretmen' ? ' chip-ogretmen' : ''}`}
             onClick={() => toggle(r.id)}>{r.ad}</button>
         ))}
+        <span className="durum-cipi">{badges.join(', ')} etkin</span>
       </div>
       <ul className="panel" style={{ padding: '1rem' }}>{msgs.map((m, i) => <li key={i}><b>{m.from}:</b> {m.text}</li>)}</ul>
       {approvals.map((a, i) => (

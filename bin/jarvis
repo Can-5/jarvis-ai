@@ -19,5 +19,7 @@ case "${1:-help}" in
     echo durdu ;;
   status) curl -sf localhost:3000/api/health && curl -sf localhost:8765/health && echo " ikisi de ayakta" ;;
   logs) tail -n 50 -f data/server.log data/voice.log ;;
-  *) echo "kullanim: jarvis {dev|start|stop|status|logs}" ;;
+  electron)
+    npm run electron ;;
+  *) echo "kullanim: jarvis {dev|start|stop|status|logs|electron}" ;;
 esac
