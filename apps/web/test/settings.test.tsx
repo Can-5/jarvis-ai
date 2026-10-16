@@ -13,7 +13,7 @@ describe('Settings', () => {
       return new Response(JSON.stringify({ ok: true }));
     }));
     render(<Settings />);
-    await waitFor(() => screen.getByLabelText('asistan adi'));
+    await waitFor(() => screen.getByLabelText('Asistan adı'));
     fireEvent.click(screen.getByText('kaydet'));
     await waitFor(() => expect(calls.some(([u, m]) => u === '/api/settings' && m === 'PUT')).toBe(true));
   });

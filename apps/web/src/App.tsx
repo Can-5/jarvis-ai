@@ -5,21 +5,24 @@ import Settings from './pages/Settings.js';
 export default function App() {
   const [sayfa, setSayfa] = useState<'sohbet' | 'ayarlar'>('sohbet');
   return (
-    <main className="min-h-screen bg-[#04070a] text-[#e8f4f8] p-4">
+    <main className="min-h-screen p-4">
       <div className="reactor" aria-hidden="true">
         <div className="reactor-tunnel"></div>
         <div className="reactor-ring"></div>
         <div className="reactor-core"></div>
       </div>
-      <div className="top-bar">
-        <h1 className="jv-title">JARVIS</h1>
-        <span className="status-chip">sistem hazir</span>
+      <div className="topbar">
+        <h1>JARVIS</h1>
+        <div className="durum-cubugu">
+          <div className="durum-nokta"></div>
+          <span>sistem hazir</span>
+        </div>
       </div>
-      <nav className="hud-panel" style={{ padding: '0.6rem 1rem', marginBottom: '1.5rem', display: 'inline-block' }}>
+      <div className="sekmeler">
         <button className={sayfa === 'sohbet' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('sohbet')}>sohbet</button>
         <button className={sayfa === 'ayarlar' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('ayarlar')}>ayarlar</button>
-      </nav>
-      <div className="hud-panel" style={{ padding: '1.2rem', minHeight: '55vh' }}>
+      </div>
+      <div className="panel" style={{ minHeight: '55vh', display: 'flex', flexDirection: 'column' }}>
         {sayfa === 'sohbet' ? <Chat goSettings={() => setSayfa('ayarlar')} /> : <Settings />}
       </div>
     </main>
