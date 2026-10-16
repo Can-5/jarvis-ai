@@ -6,6 +6,11 @@ export default function App() {
   const [sayfa, setSayfa] = useState<'sohbet' | 'ayarlar'>('sohbet');
   return (
     <main className="min-h-screen bg-[#0b0f14] text-[#e8f4f8] p-4">
+      <div className="reactor" aria-hidden="true">
+        <div className="reactor-tunnel"></div>
+        <div className="reactor-ring"></div>
+        <div className="reactor-core"></div>
+      </div>
       <h1 className="text-2xl">JARVIS</h1>
       <nav>
         <button className={sayfa === 'sohbet' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('sohbet')}>sohbet</button>

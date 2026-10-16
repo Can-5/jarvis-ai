@@ -71,9 +71,9 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
             onClick={() => toggle(r.id)}>{r.ad}</button>
         ))}
       </div>
-      <ul>{msgs.map((m, i) => <li key={i}><b>{m.from}:</b> {m.text}</li>)}</ul>
+      <ul className="panel" style={{ padding: '1rem' }}>{msgs.map((m, i) => <li key={i}><b>{m.from}:</b> {m.text}</li>)}</ul>
       {approvals.map((a, i) => (
-        <div key={i}>
+        <div key={i} className="approval-card">
           <p><b>{a.tool}</b> izin istiyor: {a.reason}</p>
           <button onClick={() => fetch('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conv: 'ana', tool: a.tool, ok: true }) })}>onayla</button>
           <button onClick={() => fetch('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conv: 'ana', tool: a.tool, ok: false }) })}>reddet</button>

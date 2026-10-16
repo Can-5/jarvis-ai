@@ -1,26 +1,303 @@
 @import "tailwindcss";
 
-:root { color-scheme: dark; }
-body { background: #0b0f14; color: #e8f4f8; }
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: rgba(10, 20, 40, 0.55);
+  --neon-cyan: #00d4ff;
+  --neon-teal: #00b4d8;
+  --text-primary: #e0f2f1;
+  --text-secondary: #607d8b;
+  --panel-border: 1px solid rgba(0, 212, 255, 0.15);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.1);
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+}
 
-label { display: block; margin: 0.5rem 0; font-size: 0.9rem; opacity: 0.9; }
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  color-scheme: dark;
+}
+
+/* Grid arka plan + scanline overlay (HUD hissi) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(ellipse at center, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+  background-size: 60px 60px, 60px 60px, 100% 100%;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 200, 255, 0.012) 2px, rgba(0, 200, 255, 0.012) 4px);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 1.5rem;
+  font-family: var(--font-display);
+}
+
+/* Arc Reactor widget (sağ üst köşede dönen) */
+.reactor {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 260px;
+  height: 260px;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reactor-tunnel {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  position: absolute;
+  animation: reactor-rotate 4s linear infinite reverse;
+}
+
+.reactor-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 212, 255, 0.25);
+  position: relative;
+  animation: reactor-rotate 6s linear infinite;
+}
+
+.reactor-core {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--neon-cyan) 0%, transparent 70%);
+  box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0, 212, 255, 0.2);
+  border: 2px solid rgba(0, 212, 255, 0.4);
+  position: absolute;
+  animation: reactor-pulse 2s ease-in-out infinite;
+}
+
+@keyframes reactor-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes reactor-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0, 212, 255, 0.2); }
+  50% { opacity: 1; transform: scale(1.05); box-shadow: 0 0 40px var(--neon-cyan), 0 0 80px rgba(0, 212, 255, 0.3); }
+}
+
+/* HUD Panel */
+.panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(8px);
+  border: var(--panel-border);
+  border-radius: 1rem;
+  box-shadow: var(--glow-cyan);
+}
+
+/* Typography */
+h1 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+  margin: 0 0 1.5rem 0;
+}
+
+h2 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  color: var(--neon-teal);
+  margin: 1.5rem 0 0.75rem;
+  opacity: 0.9;
+}
+
+/* Form elements */
+label {
+  display: block;
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
 input, select, textarea {
-  display: block; width: 100%; margin-top: 0.25rem; padding: 0.5rem;
-  background: #131a22; color: #e8f4f8; border: 1px solid #263241; border-radius: 0.5rem;
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(19, 26, 34, 0.8);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
 }
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+}
+
+/* Buttons */
 button {
-  padding: 0.45rem 0.9rem; margin: 0.2rem 0.2rem 0.2rem 0; background: #1b2735; color: #e8f4f8;
-  border: 1px solid #2c3c50; border-radius: 0.5rem; cursor: pointer;
+  padding: 0.55rem 1.1rem;
+  margin: 0.25rem 0.25rem 0.25rem 0;
+  background: rgba(27, 39, 53, 0.9);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-button:hover { background: #24334a; }
-h2 { margin: 1.2rem 0 0.4rem; font-size: 1rem; letter-spacing: 0.03em; opacity: 0.75; }
-ul { list-style: none; padding: 0; margin: 0.8rem 0; }
-li { padding: 0.45rem 0.6rem; margin-bottom: 0.3rem; background: #121a24; border-radius: 0.5rem; }
-.sekme { background: transparent; border-color: transparent; opacity: 0.6; }
-.sekme-acik { background: #1b2735; border-color: #2c3c50; opacity: 1; }
-.chip { border-radius: 999px; padding: 0.3rem 0.7rem; font-size: 0.85rem; opacity: 0.5; }
-.chip-acik { opacity: 1; border-color: #4ec9b0; background: #16302b; }
+
+button:hover {
+  background: rgba(36, 51, 74, 0.95);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+button:active { transform: translateY(1px); }
+
+/* Tabs */
+.sekme {
+  background: transparent;
+  border-color: transparent;
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+
+.sekme-acik {
+  background: rgba(27, 39, 53, 0.9);
+  border-color: var(--neon-cyan);
+  opacity: 1;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Chips */
+.chip {
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  opacity: 0.45;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  background: rgba(19, 26, 34, 0.6);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  margin: 0.25rem;
+}
+
+.chip-acik {
+  opacity: 1;
+  border-color: var(--neon-cyan);
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.25);
+}
+
+/* Messages */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.4rem;
+  background: rgba(18, 26, 36, 0.7);
+  border-radius: 0.8rem;
+  border-left: 3px solid var(--neon-cyan);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+}
+
+li b {
+  color: var(--neon-teal);
+  font-family: var(--font-mono);
+}
+
+/* Approval cards */
+.approval-card {
+  padding: 0.8rem 1rem;
+  background: rgba(58, 42, 18, 0.6);
+  border: 1px solid rgba(122, 90, 30, 0.5);
+  border-radius: 0.8rem;
+  margin: 0.6rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+/* Warning banner */
 .uyari {
-  padding: 0.7rem 0.9rem; margin-bottom: 0.8rem; background: #3a2a12;
-  border: 1px solid #7a5a1e; border-radius: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  background: rgba(58, 42, 18, 0.7);
+  border: 1px solid rgba(122, 90, 30, 0.6);
+  border-radius: 0.8rem;
+  color: #ffab00;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  box-shadow: 0 0 15px rgba(122, 90, 30, 0.2);
+}
+
+.uyari button {
+  margin-top: 0.5rem;
+  background: rgba(122, 90, 30, 0.4);
+  border-color: #ffab00;
+  color: #ffab00;
+}
+
+.uyari button:hover {
+  background: rgba(255, 171, 0, 0.15);
+}
+
+/* Offline hint */
+.offline {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  margin: 0.5rem 0;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  #root { padding: 0.75rem; }
+  .reactor { width: 180px; height: 180px; top: 1rem; right: 1rem; }
+  h1 { font-size: 1.25rem; margin-bottom: 1rem; }
 }

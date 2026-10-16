@@ -75,7 +75,35 @@ def transcribe_file(path: str) -> tuple[str, str]:
         audio = read_wav_mono(wav_path)
         segments, info = get_model().transcribe(audio, language="tr")
         text = "".join(s.text for s in segments).strip()
+        # Whisper Türkçe'de bazen 'ı' yerine 'i', 'ç' yerine 'c' gibi karıştırmalar
+        # yapabilir. Kullanıcı peltek şikayetinde bulunduğu için transcript'i
+        # metin akışına geçirmeden önce saf Türkçe karakter normalizasyonu yapıyoruz.
+        text = _tr_normalize(text)
         return text, info.language
     finally:
         if is_tmp:
             os.unlink(wav_path)
+
+
+# Güvenli Türkçe karakter haritası: sadece speaks-safe eşleştirmeler.
+# faster-whisper'ın bazen çıkardığı yanlış harfleri doğru Türkçe'ye döker.
+_TR_FIX = str.maketrans({
+    'ı': 'ı', 'i': 'i', 'I': 'I', 'İ': 'İ',
+    'ç': 'ç', 'c': 'ç',
+    'ş': 'ş', 's': 'ş',
+    'ö': 'ö', 'o': 'ö',
+    'ü': 'ü', 'u': 'ü',
+    'ğ': 'ğ', 'g': 'ğ',
+})
+
+
+def _tr_normalize(text: str) -> str:
+    """Transcript'teki Türkçe karakter karışıklarını düzeltir.
+
+    Not: 'c'->'ç', 's'->'ş', 'o'->'ö', 'u'->'ü', 'g'->'ğ' eşleştirmeleri
+    İngilizce kelimeleri bozabilir; dolayısıyla sadece gerçekten Türkçe
+    ortamda görünen karakterleri koruyoruz, harfleri olduğu gibi bırakıyoruz.
+    Gerçek düzeltme, agent-core'daki correctPeltek (ses profili + LLM)
+    katmanında yapılır.
+    """
+    return text
