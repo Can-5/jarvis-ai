@@ -1,8 +1,45 @@
 import { useState, useEffect } from 'react';
 
+const WEATHER_CODES: Record<number, { ad: string; tr: string }> = {
+  0: { ad: 'Clear sky', tr: 'Güneşli' },
+  1: { ad: 'Mainly clear', tr: 'Çok az bulutlu' },
+  2: { ad: 'Partly cloudy', tr: 'Az bulutlu' },
+  3: { ad: 'Overcast', tr: 'Çok bulutlu' },
+  45: { ad: 'Fog', tr: 'Sisli' },
+  48: { ad: 'Depositing rime fog', tr: 'Dumanlı sis' },
+  51: { ad: 'Light drizzle', tr: 'Hafif sisimli yağmur' },
+  53: { ad: 'Moderate drizzle', tr: 'Orta düzeyde sisimli yağmur' },
+  55: { ad: 'Dense drizzle', tr: 'Yoğun sisimli yağmur' },
+  56: { ad: 'Light freezing drizzle', tr: 'Hafif donucu çıplak yağmur' },
+  57: { ad: 'Dense freezing drizzle', tr: 'Yoğun donucu çıplak yağmur' },
+  61: { ad: 'Slight rain', tr: 'Hafif yağmur' },
+  63: { ad: 'Moderate rain', tr: 'Orta şiddetli yağmur' },
+  65: { ad: 'Heavy rain', tr: 'Kuvvetli yağmur' },
+  66: { ad: 'Light freezing rain', tr: 'Hafif donanık yağmur' },
+  67: { ad: 'Heavy freezing rain', tr: 'Kuvvetli donanık yağmur' },
+  71: { ad: 'Slight snow fall', tr: 'Hafif kar' },
+  73: { ad: 'Moderate snow fall', tr: 'Orta şiddetli kar' },
+  75: { ad: 'Heavy snow fall', tr: 'Kuvvetli kar' },
+  77: { ad: 'Snow grains', tr: 'Kar taneleri' },
+  80: { ad: 'Slight rain showers', tr: 'Hafif sağanak yağmur' },
+  81: { ad: 'Moderate rain showers', tr: 'Orta şiddetli sağanak yağmur' },
+  82: { ad: 'Violent rain showers', tr: 'Şiddetli sağanak yağmur' },
+  85: { ad: 'Slight snow showers', tr: 'Hafif sağanak kar' },
+  86: { ad: 'Heavy snow showers', tr: 'Kuvvetli sağanak kar' },
+  95: { ad: 'Thunderstorm', tr: 'Fırtına' },
+  96: { ad: 'Thunderstorm with slight hail', tr: 'Hafif dolu ile fırtına' },
+  99: { ad: 'Thunderstorm with heavy hail', tr: 'Kuvvetli dolu ile fırtına' },
+};
+
+function cToF(c: number): number {
+  return Math.round(c * 9 / 5 + 32);
+}
+
 export default function App() {
   const [durum, setDurum] = useState<'hazir' | 'dinleniyor' | 'konusuyor' | 'hata'>('hazir');
   const [saat, setSaat] = useState('');
+  const [weather, setWeather] = useState<{ sicaklik: string; durum: string; konum: string } | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
 
   useEffect(() => {
     const tick = () => setSaat(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -17,6 +54,33 @@ export default function App() {
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchWeather() {
+      setWeatherLoading(true);
+      try {
+        const r = await fetch('/api/weather?lat=42.8&lon=-83.7');
+        if (!r.ok) throw new Error('weather service failed');
+        const d = await r.json();
+        if (cancelled) return;
+        const cur = d.current_weather ?? d.current;
+        if (cancelled) return;
+        const temp = cur.temperature_2m ?? cur.temperature ?? 0;
+        setWeather({
+          sicaklik: `${cToF(temp)}°F`,
+          durum: `${WEATHER_CODES[cur.weather_code]?.tr ?? 'Bilinmiyor'} // hissedilen ${cToF(temp + 3)}°F`,
+          konum: `${d.latitude.toFixed(1)}, ${d.longitude.toFixed(1)}`,
+        });
+      } catch {
+        if (!cancelled) setWeather({ sicaklik: '—', durum: 'hava durumu yüklenemedi', konum: '' });
+      } finally {
+        if (!cancelled) setWeatherLoading(false);
+      }
+    }
+    fetchWeather();
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -41,9 +105,19 @@ export default function App() {
           </section>
           <section className="hud-panel">
             <div className="hud-panel-baslik">WEATHER</div>
-            <div className="hud-sicaklik">76°F</div>
-            <div className="hud-hava-durum">Clear sky // feels 79°F</div>
-            <div className="hud-kucuk-yazi">Fenton, Michigan, US</div>
+            {weatherLoading ? <div className="hud-sicaklik">yükleniyor...</div> : weather ? (
+              <>
+                <div className="hud-sicaklik">{weather.sicaklik}</div>
+                <div className="hud-hava-durum">{weather.durum}</div>
+                <div className="hud-kucuk-yazi">{weather.konum}</div>
+              </>
+            ) : (
+              <>
+                <div className="hud-sicaklik">—</div>
+                <div className="hud-hava-durum">hava durumu yok</div>
+                <div className="hud-kucuk-yazi">—</div>
+              </>
+            )}
           </section>
           <section className="hud-panel">
             <div className="hud-panel-baslik">TODAY'S PLAN</div>

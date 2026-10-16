@@ -42,4 +42,13 @@ describe('server', () => {
     mock.close();
     expect(res.statusCode).toBe(200);
   });
+  it('weather rotasi calisir', async () => {
+    const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });
+    const res = await app.inject({ method: 'GET', url: '/api/weather?lat=42.8&lon=-83.7' });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body).toHaveProperty('latitude');
+    expect(body).toHaveProperty('longitude');
+    expect(body.current || body.current_weather).toBeDefined();
+  });
 });

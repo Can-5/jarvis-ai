@@ -35,6 +35,16 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
   app.get('/api/health', async () => ({ ok: true }));
   app.get('/api/ollama', async () => ({ models: await detectOllama() }));
 
+  app.get('/api/weather', async (req, reply) => {
+    const q = req.query as { lat?: string; lon?: string };
+    const lat = Number(q.lat ?? 42.8);
+    const lon = Number(q.lon ?? -83.7);
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m`;
+    const upstream = await fetch(url);
+    if (!upstream.ok) return reply.code(upstream.status).send({ error: 'weather service failed' });
+    return upstream.json();
+  });
+
   app.get('/api/status', async () => {
     const db = settingsDb();
     const saglayici = setting(db, 'saglayici', 'ollama');
