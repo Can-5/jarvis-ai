@@ -11,6 +11,7 @@ import { promisify } from 'node:util';
 import { BadgeId, dataDir, type ProviderId } from '@jarvis/shared';
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
+import { telegramBot, type TelegramBotAdapter } from './telegram.js';
 
 const VOICE = (): string => process.env.JARVIS_VOICE_URL ?? 'http://localhost:8765';
 
@@ -155,6 +156,66 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return { ok: true, note: 'tunnel baslatildi, URL terminalde ve logda gorunur' };
   });
 
+  const telegramAdapter: TelegramBotAdapter = {
+    onText: async (conv, text) => {
+      const db = settingsDb();
+      const provider = setting(db, 'saglayici', 'ollama') as ProviderId;
+      const model = setting(db, 'model', 'qwen3-coder:30b');
+      db.close();
+      try {
+        const res = await runTurn({ text, badges: ['chat'], mode: 'normal', approvals: [], provider, model }, llm);
+        mem.saveTurn(conv, text, res.reply);
+        return res.reply;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return `işlemedi kanka: ${msg}`;
+      }
+    },
+    onVoice: async (conv, audio) => {
+      let text = '';
+      try {
+        const upstream = await fetch(`${VOICE()}/stt`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'audio/ogg' },
+          body: audio as BodyInit,
+        });
+        const sttRes = (await upstream.json()) as { text?: string };
+        text = sttRes?.text ?? '';
+      } catch {
+        text = '';
+      }
+      if (!text) return 'anlayamadim kanka, tekrar misin?';
+      const db = settingsDb();
+      const provider = setting(db, 'saglayici', 'ollama') as ProviderId;
+      const model = setting(db, 'model', 'qwen3-coder:30b');
+      db.close();
+      try {
+        const res = await runTurn({ text, badges: ['ses', 'chat'], mode: 'normal', approvals: [], provider, model }, llm);
+        mem.saveTurn(conv, text, res.reply);
+        return res.reply;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return `işlemedi kanka: ${msg}`;
+      }
+    },
+  };
+  telegramBot.setAdapter(telegramAdapter);
+
+  app.get('/api/telegram/status', async () => ({
+    running: telegramBot.isRunning(),
+    configured: telegramBot.hasToken() || !!process.env.TELEGRAM_BOT_TOKEN,
+  }));
+  app.post('/api/telegram/start', async (req) => {
+    const body = z.object({ token: z.string().min(10) }).parse(req.body);
+    if (telegramBot.isRunning()) telegramBot.stop();
+    await telegramBot.start(body.token);
+    return { ok: true };
+  });
+  app.post('/api/telegram/stop', async () => {
+    telegramBot.stop();
+    return { ok: true };
+  });
+
   const here = new URL('.', import.meta.url).pathname;
   const webDist = [
     join(process.cwd(), 'apps/web/dist'),
@@ -180,4 +241,8 @@ if (isMain || process.env.JARVIS_SERVE === '1') {
   const app = await build();
   await app.listen({ port: 3000, host: '0.0.0.0' });
   console.log('JARVIS server :3000 dinliyor');
+  if (process.env.TELEGRAM_BOT_TOKEN) {
+    await telegramBot.start(process.env.TELEGRAM_BOT_TOKEN);
+    console.log('Telegram botu baslatildi (polling)');
+  }
 }
