@@ -1,20 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --bg-deep: #05070a;
-  --bg-panel: rgba(8, 16, 28, 0.65);
+  --bg-deep: #030507;
+  --bg-deep-alt: #05070a;
+  --bg-panel: rgba(10, 16, 28, 0.7);
+  --bg-panel-alt: rgba(14, 20, 34, 0.6);
   --neon-cyan: #00d4ff;
   --neon-blue: #0088ff;
   --neon-amber: #ffab00;
   --neon-red: #ff3e3e;
   --text-primary: #e8f4f8;
   --text-secondary: #88a0b0;
-  --panel-border: 1px solid rgba(0, 212, 255, 0.25);
-  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.18);
-  --glow-blue: 0 0 20px rgba(0, 136, 255, 0.4);
-  --glow-amber: 0 0 20px rgba(255, 171, 0, 0.4);
+  --panel-border: 1px solid rgba(0, 212, 255, 0.3);
+  --panel-border-dim: 1px solid rgba(0, 212, 255, 0.15);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 60px rgba(0, 212, 255, 0.25);
+  --glow-cyan-weak: 0 0 12px rgba(0, 212, 255, 0.3);
+  --glow-amber: 0 0 20px rgba(255, 171, 0, 0.5);
+  --glow-red: 0 0 20px rgba(255, 62, 62, 0.5);
   --font-display: 'Outfit', system-ui, -apple-system, 'Segoe UI', 'DejaVu Sans', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'DejaVu Sans Mono', monospace;
+  --radius: 1rem;
+  --radius-sm: 0.6rem;
 }
 
 * { box-sizing: border-box; }
@@ -45,9 +51,9 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px),
-    radial-gradient(ellipse at center, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(ellipse at center, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
   background-size: 50px 50px, 50px 50px, 100% 100%;
 }
 
@@ -57,52 +63,99 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 200, 255, 0.015) 2px, rgba(0, 200, 255, 0.015) 4px);
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 200, 255, 0.012) 2px, rgba(0, 200, 255, 0.012) 4px);
 }
 
 /* ========== Ana Arc Reaktör (sağ üst, canlı dönen) ========== */
 .reactor {
   position: fixed;
-  top: 3rem;
-  right: 3rem;
-  width: 320px;
-  height: 320px;
-  z-index: 20;
+  top: 2.5rem;
+  right: 2.5rem;
+  width: 340px;
+  height: 340px;
+  z-index: 25;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.85;
+  opacity: 0.9;
+}
+
+.reactor-core-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .reactor-tunnel {
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
-  border: 2px solid rgba(0, 212, 255, 0.45);
+  border: 2px solid rgba(0, 212, 255, 0.5);
   position: absolute;
-  animation: reactor-rotate 5s linear infinite reverse;
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3) inset;
+  top: 50px;
+  left: 50px;
+  animation: reactor-rotate 6s linear infinite reverse;
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.25) inset;
 }
 
 .reactor-ring {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.35);
   position: relative;
-  animation: reactor-rotate 8s linear infinite;
+  animation: reactor-rotate 10s linear infinite;
+}
+
+.reactor-ring::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border-top: 2px solid var(--neon-cyan);
+  border-bottom: 2px solid transparent;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  animation: reactor-spin 2s linear infinite;
 }
 
 .reactor-core {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--neon-cyan) 0%, rgba(0, 212, 255, 0.2) 40%, transparent 70%);
-  box-shadow: 0 0 40px var(--neon-cyan), 0 0 90px rgba(0, 212, 255, 0.3);
-  border: 3px solid rgba(0, 212, 255, 0.5);
+  background: radial-gradient(circle, #ffffff 0%, var(--neon-cyan) 35%, rgba(0, 212, 255, 0.15) 70%, transparent 100%);
+  box-shadow: 0 0 50px var(--neon-cyan), 0 0 100px rgba(0, 212, 255, 0.35);
+  border: 3px solid rgba(0, 212, 255, 0.6);
   position: absolute;
+  top: 120px;
+  left: 120px;
   animation: reactor-pulse 2.5s ease-in-out infinite;
+}
+
+.reactor-glow {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: reactor-pulse-glow 4s ease-in-out infinite;
+}
+
+.reactor-labels {
+  position: absolute;
+  bottom: -30px;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  text-shadow: var(--glow-cyan-weak);
 }
 
 @keyframes reactor-rotate {
@@ -110,9 +163,19 @@ body::after {
   to { transform: rotate(360deg); }
 }
 
+@keyframes reactor-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes reactor-pulse {
-  0%, 100% { opacity: 0.85; transform: scale(1); box-shadow: 0 0 40px var(--neon-cyan), 0 0 90px rgba(0, 212, 255, 0.3); }
-  50% { opacity: 1; transform: scale(1.08); box-shadow: 0 0 55px var(--neon-cyan), 0 0 110px rgba(0, 212, 255, 0.45); }
+  0%, 100% { opacity: 0.9; transform: scale(1); box-shadow: 0 0 50px var(--neon-cyan), 0 0 100px rgba(0, 212, 255, 0.35); }
+  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 65px var(--neon-cyan), 0 0 120px rgba(0, 212, 255, 0.45); }
+}
+
+@keyframes reactor-pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
 }
 
 /* ========== Üst çubuk: başlık + durum ========== */
@@ -120,33 +183,33 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   z-index: 10;
   position: relative;
 }
 
 .topbar h1 {
   font-family: var(--font-mono);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   color: var(--neon-cyan);
-  text-shadow: 0 0 20px rgba(0, 212, 255, 0.7);
+  text-shadow: var(--glow-cyan-weak);
   margin: 0;
 }
 
 .durum-cubugu {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem;
   align-items: center;
   background: var(--bg-panel);
   border: var(--panel-border);
-  border-radius: 1rem;
+  border-radius: var(--radius);
   padding: 0.5rem 1rem;
-  backdrop-filter: blur(8px);
-  box-shadow: var(--glow-cyan);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--glow-cyan-weak);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
@@ -167,11 +230,22 @@ body::after {
 /* ========== HUD Panel ========== */
 .panel {
   background: var(--bg-panel);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border: var(--panel-border);
-  border-radius: 1.25rem;
-  box-shadow: var(--glow-cyan);
+  border-radius: var(--radius);
+  box-shadow: var(--glow-cyan-weak);
   padding: 1.5rem;
+}
+
+.panel h2 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: var(--neon-blue);
+  margin: 0 0 1rem;
+  border-bottom: 1px solid rgba(0, 136, 255, 0.3);
+  padding-bottom: 0.4rem;
 }
 
 /* ========== Typography ========== */
@@ -179,9 +253,9 @@ h2 {
   font-family: var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--neon-blue);
-  margin: 1.5rem 0 0.75rem;
+  margin: 1.25rem 0 0.75rem;
   border-bottom: 1px solid rgba(0, 136, 255, 0.3);
   padding-bottom: 0.4rem;
 }
@@ -190,10 +264,10 @@ h2 {
 label {
   display: block;
   margin: 0.75rem 0 0.25rem;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
-  opacity: 0.9;
+  opacity: 0.85;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -202,13 +276,13 @@ input, select, textarea {
   display: block;
   width: 100%;
   margin-top: 0.25rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.65rem 0.85rem;
   background: rgba(12, 22, 38, 0.85);
   color: var(--text-primary);
-  border: 1px solid rgba(0, 212, 255, 0.35);
-  border-radius: 0.75rem;
+  border: var(--panel-border-dim);
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -220,15 +294,15 @@ input:focus, select:focus, textarea:focus {
 
 /* ========== Butonlar ========== */
 button {
-  padding: 0.65rem 1.2rem;
-  margin: 0.3rem 0.3rem 0.3rem 0;
+  padding: 0.6rem 1.1rem;
+  margin: 0.25rem 0.25rem 0.25rem 0;
   background: rgba(20, 34, 56, 0.9);
   color: var(--text-primary);
-  border: 1px solid rgba(0, 212, 255, 0.35);
-  border-radius: 0.75rem;
+  border: var(--panel-border-dim);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -252,11 +326,35 @@ button.vurgulu:hover {
   box-shadow: 0 0 22px rgba(0, 212, 255, 0.35);
 }
 
+button.mikrofon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+button.mikrofon.kayitli {
+  background: rgba(255, 62, 62, 0.2);
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+  box-shadow: var(--glow-red);
+  animation: mic-pulse 1.5s infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 62, 62, 0.4); transform: scale(1.05); }
+}
+
 /* ========== Sekmalar ========== */
 .sekmeler {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
   z-index: 10;
   position: relative;
 }
@@ -264,20 +362,22 @@ button.vurgulu:hover {
 .sekme {
   background: transparent;
   border-color: transparent;
-  opacity: 0.45;
+  opacity: 0.4;
   color: var(--text-secondary);
-  padding: 0.55rem 1.1rem;
+  padding: 0.5rem 1rem;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid transparent;
 }
 
 .sekme:hover {
   opacity: 0.7;
   color: var(--neon-blue);
+  border-color: rgba(0, 212, 255, 0.3);
 }
 
 .sekme-acik {
@@ -292,14 +392,14 @@ button.vurgulu:hover {
 /* ========== Mod chip'leri ========== */
 .rozetler {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
 .rozet-baslik {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--neon-blue);
   opacity: 0.8;
   margin-right: 0.5rem;
@@ -311,20 +411,20 @@ button.vurgulu:hover {
 
 .chip {
   border-radius: 999px;
-  padding: 0.4rem 0.95rem;
-  font-size: 0.85rem;
-  opacity: 0.4;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  opacity: 0.35;
   border: 1px solid rgba(0, 212, 255, 0.25);
-  background: rgba(12, 22, 38, 0.6);
+  background: rgba(12, 22, 38, 0.5);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  margin: 0.2rem;
+  margin: 0.15rem;
   cursor: pointer;
   transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .chip:hover {
-  opacity: 0.7;
+  opacity: 0.65;
   border-color: var(--neon-blue);
   color: var(--neon-blue);
 }
@@ -337,7 +437,6 @@ button.vurgulu:hover {
   box-shadow: 0 0 18px rgba(0, 212, 255, 0.3);
 }
 
-/* Mod özel renkleri */
 .chip-ogretmen { border-color: var(--neon-amber) !important; color: var(--neon-amber) !important; background: rgba(255, 171, 0, 0.15) !important; box-shadow: 0 0 18px rgba(255, 171, 0, 0.3) !important; }
 .chip-yazar { border-color: #8b5cf6 !important; color: #8b5cf6 !important; background: rgba(139, 92, 246, 0.15) !important; box-shadow: 0 0 18px rgba(139, 92, 246, 0.3) !important; }
 .chip-planlayici { border-color: #10b981 !important; color: #10b981 !important; background: rgba(16, 185, 129, 0.15) !important; box-shadow: 0 0 18px rgba(16, 185, 129, 0.3) !important; }
@@ -345,8 +444,8 @@ button.vurgulu:hover {
 
 .durum-cipi {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  padding: 0.2rem 0.55rem;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
   background: rgba(0, 212, 255, 0.1);
   border: 1px solid var(--neon-cyan);
   border-radius: 0.5rem;
@@ -356,42 +455,102 @@ button.vurgulu:hover {
 }
 
 /* ========== Mesaj listesi ========== */
-ul {
+.mesaj-liste {
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.9rem;
 }
 
-li {
+.mesaj {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.mesaj.ben { flex-direction: row-reverse; }
+
+.mesaj-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.mesaj-avatar.jarvis {
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: var(--glow-cyan-weak);
+}
+
+.mesaj-avatar.ben {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid #8b5cf6;
+  color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+
+.mesaj-baloncuk {
+  max-width: 75%;
   padding: 0.85rem 1.1rem;
-  margin-bottom: 0.4rem;
-  background: rgba(12, 22, 38, 0.7);
-  border-radius: 0.9rem;
-  border-left: 3px solid var(--neon-cyan);
+  border-radius: 1.1rem;
   font-family: var(--font-display);
   font-size: 0.95rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  line-height: 1.5;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
-li b {
+.mesaj-baloncuk.jarvis {
+  background: rgba(12, 22, 38, 0.7);
+  border: var(--panel-border-dim);
+  border-bottom-left-radius: 0.4rem;
+  color: var(--text-primary);
+}
+
+.mesaj-baloncuk.ben {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.18), rgba(0, 136, 255, 0.12));
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  border-bottom-right-radius: 0.4rem;
+  color: #ffffff;
+}
+
+.mesaj-baloncuk b {
   color: var(--neon-blue);
   font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.4rem;
+  opacity: 0.8;
 }
 
 /* ========== Approval kartları ========== */
 .approval-card {
-  padding: 0.9rem 1.1rem;
+  padding: 1rem 1.2rem;
   background: rgba(58, 42, 18, 0.65);
   border: 1px solid rgba(122, 90, 30, 0.5);
   border-radius: 0.9rem;
-  margin: 0.7rem 0;
+  margin: 0.75rem 0;
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  box-shadow: 0 0 12px rgba(58, 42, 18, 0.25);
+  box-shadow: 0 0 15px rgba(58, 42, 18, 0.25);
 }
+
+.approval-card p {
+  margin: 0 0 0.75rem;
+  color: var(--text-primary);
+}
+
+.approval-card b { color: var(--neon-amber); }
 
 .approval-card button {
   margin-top: 0.5rem;
@@ -416,6 +575,7 @@ li b {
   border-color: var(--neon-amber);
   color: var(--neon-amber);
   background: rgba(255, 171, 0, 0.08);
+  box-shadow: var(--glow-amber);
 }
 
 .uyari button {
@@ -432,7 +592,7 @@ li b {
 /* ========== Offline ipucu ========== */
 .offline {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-family: var(--font-mono);
   margin: 0.5rem 0;
   opacity: 0.6;
@@ -440,25 +600,80 @@ li b {
 
 .tunnel-butonlar {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem;
   align-items: center;
-  margin-top: 0.75rem;
+  margin-top: 0.6rem;
 }
 
 .kucuk-metin {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
-  margin-top: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+/* ========== Settings form ========== */
+.settings-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-section {
+  background: var(--bg-panel-alt);
+  border: var(--panel-border-dim);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.settings-section h3 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--neon-cyan);
+  margin: 0 0 0.9rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: 0.4rem;
+}
+
+.settings-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.settings-label span {
+  min-width: 120px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }
 
 /* ========== Responsive ========== */
 @media (max-width: 640px) {
   #root { padding: 0.75rem; }
   .reactor { width: 200px; height: 200px; top: 1rem; right: 1rem; }
-  .reactor-core { width: 60px; height: 60px; }
-  .reactor-tunnel { width: 140px; height: 140px; }
-  h1 { font-size: 1.25rem; margin-bottom: 1rem; }
-  .topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .reactor-tunnel { width: 140px; height: 140px; top: 30px; left: 30px; }
+  .reactor-core { width: 60px; height: 60px; top: 70px; left: 70px; }
+  .reactor-ring::after { inset: -2px; }
+  .mesaj-baloncuk { max-width: 85%; }
+  h1 { font-size: 1.1rem; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
   .panel { padding: 1rem; }
+  .mesaj-liste { gap: 0.7rem; }
 }

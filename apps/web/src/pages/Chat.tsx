@@ -9,6 +9,11 @@ const ROZETLER: { id: Badge; ad: string }[] = [
   { id: 'ogretmen', ad: '📚 öğretmen' }, { id: 'yazar', ad: '✍️ yazar' }, { id: 'planlayici', ad: '🗓️ planlayici' },
 ];
 
+const ROZET_LABEL: Record<string, string> = {
+  chat: 'Sohbet', ses: 'Sesli', kod: 'Kod', arastirma: 'Araştırma',
+  siber: 'Siber Güvenlik', ogretmen: 'Öğretmen', yazar: 'Yazar', planlayici: 'Planlayıcı',
+};
+
 export default function Chat({ goSettings }: { goSettings?: () => void }) {
   const { msgs, approvals, offline, send } = useChat('ana');
   const [text, setText] = useState('');
@@ -35,51 +40,67 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
       rec.current?.stop();
       return;
     }
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mr = new MediaRecorder(stream);
-    chunks.current = [];
-    mr.ondataavailable = (e) => chunks.current.push(e.data);
-    mr.onstop = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunks.current = [];
+      mr.ondataavailable = (e) => chunks.current.push(e.data);
+      mr.onstop = async () => {
+        setKaydediyor(false);
+        const blob = new Blob(chunks.current, { type: 'audio/webm' });
+        const r = await fetch('/api/stt', { method: 'POST', body: blob });
+        const { text: t } = (await r.json()) as { text: string };
+        if (t) await send(t, Array.from(new Set<Badge>([...badges, 'ses'])));
+        const tts = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t }) });
+        if (tts.ok) {
+          const url = URL.createObjectURL(await tts.blob());
+          await new Audio(url).play().catch(() => undefined);
+        }
+      };
+      rec.current = mr;
+      mr.start();
+      setKaydediyor(true);
+    } catch {
       setKaydediyor(false);
-      const blob = new Blob(chunks.current, { type: 'audio/webm' });
-      const r = await fetch('/api/stt', { method: 'POST', body: blob });
-      const { text: t } = (await r.json()) as { text: string };
-      if (t) await send(t, Array.from(new Set<Badge>([...badges, 'ses'])));
-      const tts = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t }) });
-      if (tts.ok) {
-        const url = URL.createObjectURL(await tts.blob());
-        await new Audio(url).play().catch(() => undefined);
-      }
-    };
-    rec.current = mr;
-    mr.start();
-    setKaydediyor(true);
+    }
   }
 
   return (
-    <main>
+    <main className="flex flex-col gap-2">
       {kurulmamis && (
         <div className="uyari">
           HENIZ MODEL YOK — ayarlardan bir API anahtari ekle veya ollama kur.
-          {goSettings && <button onClick={goSettings}>ayarlara git</button>}
+          {goSettings && <button className="vurgulu" onClick={goSettings}>ayarlara git</button>}
         </div>
       )}
       {badges.includes('ogretmen') && (
-        <div className="uyari" style={{ borderColor: 'var(--neon-amber)', color: 'var(--neon-amber)' }}>
+        <div className="uyari ogretmen-uyari">
           📚 Öğretmen modu etkin — basit anlatırım, örnek veririm, sona küçük bir soru sorarım. Ne öğrenmek istersin?
-          <button style={{ marginTop: '0.5rem', background: 'rgba(255,171,0,0.15)', borderColor: 'var(--neon-amber)', color: 'var(--neon-amber)' }} onClick={() => void send('merhaba, öğretmen modunda nasıl çalışırım?', ['ogretmen'])}>örnek sor</button>
+          <button className="vurgulu" style={{ marginTop: '0.5rem' }} onClick={() => void send('merhaba, öğretmen modunda nasıl çalışırım?', ['ogretmen'])}>örnek sor</button>
         </div>
       )}
-      {offline && <p>cevrimdisisin — mesajlar baglanti gelince gonderilecek</p>}
+      {offline && <p className="offline">cevrimdisisin — mesajlar baglanti gelince gonderilecek</p>}
       <div className="rozetler">
         <span className="rozet-baslik">MOD:</span>
         {ROZETLER.map((r) => (
-          <button key={r.id} className={`chip${badges.includes(r.id) ? ' chip-acik' : ''}${badges.includes(r.id) && r.id === 'ogretmen' ? ' chip-ogretmen' : ''}`}
+          <button key={r.id} title={ROZET_LABEL[r.id]} className={`chip${badges.includes(r.id) ? ' chip-acik' : ''}${badges.includes(r.id) && r.id === 'ogretmen' ? ' chip-ogretmen' : badges.includes(r.id) && r.id === 'yazar' ? ' chip-yazar' : badges.includes(r.id) && r.id === 'planlayici' ? ' chip-planlayici' : badges.includes(r.id) && r.id === 'siber' ? ' chip-siber' : ''}`}
             onClick={() => toggle(r.id)}>{r.ad}</button>
         ))}
-        <span className="durum-cipi">{badges.join(', ')} etkin</span>
+        <span className="durum-cipi">{badges.length} etkin</span>
       </div>
-      <ul className="panel" style={{ padding: '1rem' }}>{msgs.map((m, i) => <li key={i}><b>{m.from}:</b> {m.text}</li>)}</ul>
+      <ul className="mesaj-liste flex-1 overflow-y-auto pr-2">
+        {msgs.map((m, i) => (
+          <li key={i} className={`mesaj ${m.from === 'ben' ? 'ben' : ''}`}>
+            <div className="mesaj-avatar {m.from === 'jarvis' ? 'jarvis' : 'ben'}" aria-hidden="true">
+              {m.from === 'jarvis' ? 'J' : 'S'}
+            </div>
+            <div className="mesaj-baloncuk {m.from === 'jarvis' ? 'jarvis' : 'ben'}">
+              {m.from === 'jarvis' ? <><b>JARVIS</b>{m.text}</> : <><b>Siz</b>{m.text}</>}
+            </div>
+          </li>
+        ))}
+        {offline && <li className="mesaj"><div className="mesaj-avatar jarvis">J</div><div className="mesaj-baloncuk jarvis"><b>JARVIS</b> Bağlantı kopuk — mesajlarınız kuyruğa alındı.</div></li>}
+      </ul>
       {approvals.map((a, i) => (
         <div key={i} className="approval-card">
           <p><b>{a.tool}</b> izin istiyor: {a.reason}</p>
@@ -87,10 +108,19 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
           <button onClick={() => fetch('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conv: 'ana', tool: a.tool, ok: false }) })}>reddet</button>
         </div>
       ))}
-      <input value={text} onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter' && text.trim()) { void send(text, badges); setText(''); } }} />
-      <button onClick={() => { if (text.trim()) { void send(text, badges); setText(''); } }}>gonder</button>
-      <button onClick={() => void mic()}>{kaydediyor ? 'durdur' : 'konus'}</button>
+      <div className="flex gap-2">
+        <input
+          className="flex-1"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="JARVIS'e bir sey soyle..."
+          onKeyDown={(e) => { if (e.key === 'Enter' && text.trim()) { void send(text, badges); setText(''); } }}
+        />
+        <button className="vurgulu" onClick={() => { if (text.trim()) { void send(text, badges); setText(''); } }}>gonder</button>
+        <button className={`mikrofon ${kaydediyor ? 'kayitli' : ''}`} onClick={() => void mic()} title={kaydediyor ? 'durdur' : 'konus'} aria-label={kaydediyor ? 'ses kaydı durdur' : 'sesle konuş'}>
+          {kaydediyor ? '⏹' : '🎤'}
+        </button>
+      </div>
     </main>
   );
 }
