@@ -1,33 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Chat from './pages/Chat.js';
 import Settings from './pages/Settings.js';
 
 export default function App() {
   const [sayfa, setSayfa] = useState<'sohbet' | 'ayarlar'>('sohbet');
+  const [durum, setDurum] = useState<'hazir' | 'dinleniyor' | 'konusuyor' | 'hata'>('hazir');
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) setDurum('hazir');
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   return (
-    <main className="min-h-screen p-4" style={{ fontFamily: 'var(--font-display)' }}>
-      <div className="reactor" aria-hidden="true">
+    <main className="min-h-screen p-4 flex flex-col" style={{ fontFamily: 'var(--font-display)' }}>
+      <div className={`reactor ${durum !== 'hazir' ? durum : ''}`} aria-hidden="true">
         <div className="reactor-glow"></div>
         <div className="reactor-core-container">
+          <div className={`reactor-core ${durum !== 'hazir' ? durum : ''}`}></div>
           <div className="reactor-tunnel"></div>
           <div className="reactor-ring"></div>
-          <div className="reactor-core"></div>
         </div>
+        <div className="reactor-status">{durum === 'dinleniyor' ? 'dinleniyor' : durum === 'konusuyor' ? 'konusuyor' : durum === 'hata' ? 'hata' : 'hazir'}</div>
         <div className="reactor-labels">J.A.R.V.I.S. — ONLINE</div>
       </div>
       <div className="topbar">
-        <h1>J.A.R.V.I.S.</h1>
         <div className="durum-cubugu">
-          <div className="durum-nokta"></div>
-          <span>sistem hazir</span>
+          <div className={`durum-nokta ${durum === 'dinleniyor' || durum === 'konusuyor' ? 'dinleniyor' : durum === 'hata' ? 'hata' : ''}`}></div>
+          <span>{durum === 'dinleniyor' ? 'dinleniyor' : durum === 'konusuyor' ? 'konusuyor' : durum === 'hata' ? 'hata' : 'sistem hazir'}</span>
         </div>
       </div>
       <div className="sekmeler">
         <button className={sayfa === 'sohbet' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('sohbet')}>sohbet</button>
         <button className={sayfa === 'ayarlar' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('ayarlar')}>ayarlar</button>
       </div>
-      <div className="panel" style={{ minHeight: '55vh', display: 'flex', flexDirection: 'column' }}>
-        {sayfa === 'sohbet' ? <Chat goSettings={() => setSayfa('ayarlar')} /> : <Settings />}
+      <div className="panel flex-1 flex flex-col" style={{ minHeight: '55vh' }}>
+        {sayfa === 'sohbet' ? <Chat goSettings={() => setSayfa('ayarlar')} setDurum={setDurum} /> : <Settings />}
+      </div>
+      <div className="jarvis-baslik">
+        <h1>J.A.R.V.İ.S</h1>
+        <div className="jarvis-alt-yazi">Just A Rather Very Intelligent System</div>
       </div>
     </main>
   );

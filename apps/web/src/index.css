@@ -5,16 +5,15 @@
   --bg-deep-alt: #05070a;
   --bg-panel: rgba(10, 16, 28, 0.7);
   --bg-panel-alt: rgba(14, 20, 34, 0.6);
-  --neon-cyan: #00d4ff;
   --neon-blue: #0088ff;
   --neon-amber: #ffab00;
   --neon-red: #ff3e3e;
   --text-primary: #e8f4f8;
   --text-secondary: #88a0b0;
-  --panel-border: 1px solid rgba(0, 212, 255, 0.3);
-  --panel-border-dim: 1px solid rgba(0, 212, 255, 0.15);
-  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 60px rgba(0, 212, 255, 0.25);
-  --glow-cyan-weak: 0 0 12px rgba(0, 212, 255, 0.3);
+  --panel-border: 1px solid rgba(0, 136, 255, 0.3);
+  --panel-border-dim: 1px solid rgba(0, 136, 255, 0.15);
+  --glow-blue: 0 0 20px rgba(0, 136, 255, 0.5), 0 0 60px rgba(0, 136, 255, 0.25);
+  --glow-blue-weak: 0 0 12px rgba(0, 136, 255, 0.3);
   --glow-amber: 0 0 20px rgba(255, 171, 0, 0.5);
   --glow-red: 0 0 20px rgba(255, 62, 62, 0.5);
   --font-display: 'Outfit', system-ui, -apple-system, 'Segoe UI', 'DejaVu Sans', sans-serif;
@@ -69,17 +68,23 @@ body::after {
 /* ========== Ana Arc Reaktör (sağ üst, canlı dönen) ========== */
 .reactor {
   position: fixed;
-  top: 2.5rem;
-  right: 2.5rem;
-  width: 340px;
-  height: 340px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 360px;
+  height: 360px;
   z-index: 25;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0.9;
+  transition: opacity 0.3s;
 }
+
+.reactor.listening { opacity: 1; box-shadow: 0 0 60px rgba(255, 171, 0, 0.35); }
+.reactor.speaking { opacity: 1; box-shadow: 0 0 70px rgba(255, 171, 0, 0.45); }
+.reactor.error { opacity: 1; box-shadow: 0 0 80px rgba(255, 62, 62, 0.45); }
 
 .reactor-core-container {
   position: relative;
@@ -88,22 +93,22 @@ body::after {
 }
 
 .reactor-tunnel {
-  width: 240px;
-  height: 240px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
-  border: 2px solid rgba(0, 212, 255, 0.5);
+  border: 2px solid rgba(0, 136, 255, 0.5);
   position: absolute;
   top: 50px;
   left: 50px;
   animation: reactor-rotate 6s linear infinite reverse;
-  box-shadow: 0 0 40px rgba(0, 212, 255, 0.25) inset;
+  box-shadow: 0 0 40px rgba(0, 136, 255, 0.25) inset;
 }
 
 .reactor-ring {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1px solid rgba(0, 212, 255, 0.35);
+  border: 1px solid rgba(0, 136, 255, 0.35);
   position: relative;
   animation: reactor-rotate 10s linear infinite;
 }
@@ -113,7 +118,7 @@ body::after {
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border-top: 2px solid var(--neon-cyan);
+  border-top: 2px solid var(--neon-blue);
   border-bottom: 2px solid transparent;
   border-left: 2px solid transparent;
   border-right: 2px solid transparent;
@@ -121,23 +126,29 @@ body::after {
 }
 
 .reactor-core {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0%, var(--neon-cyan) 35%, rgba(0, 212, 255, 0.15) 70%, transparent 100%);
-  box-shadow: 0 0 50px var(--neon-cyan), 0 0 100px rgba(0, 212, 255, 0.35);
-  border: 3px solid rgba(0, 212, 255, 0.6);
+  background: radial-gradient(circle, #ffffff 0%, var(--neon-blue) 35%, rgba(0, 136, 255, 0.15) 70%, transparent 100%);
+  box-shadow: 0 0 50px var(--neon-blue), 0 0 100px rgba(0, 136, 255, 0.35);
+  border: 3px solid rgba(0, 136, 255, 0.6);
   position: absolute;
-  top: 120px;
-  left: 120px;
+  top: 125px;
+  left: 125px;
   animation: reactor-pulse 2.5s ease-in-out infinite;
+}
+
+.reactor-core.listening,
+.reactor-core.speaking,
+.reactor-core.error {
+  animation: reactor-pulse-fast 1.2s ease-in-out infinite;
 }
 
 .reactor-glow {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 136, 255, 0.15) 0%, transparent 70%);
   position: absolute;
   top: 0;
   left: 0;
@@ -146,16 +157,34 @@ body::after {
 
 .reactor-labels {
   position: absolute;
-  bottom: -30px;
+  bottom: -34px;
   width: 100%;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  color: var(--neon-cyan);
+  color: var(--neon-blue);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0.7;
-  text-shadow: var(--glow-cyan-weak);
+  text-shadow: var(--glow-blue-weak);
+}
+
+.reactor-status {
+  position: absolute;
+  top: -34px;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+@keyframes reactor-pulse-fast {
+  0%, 100% { opacity: 0.95; transform: scale(1); box-shadow: 0 0 40px currentColor, 0 0 80px currentColor; }
+  50% { opacity: 1; transform: scale(1.12); box-shadow: 0 0 55px currentColor, 0 0 110px currentColor; }
 }
 
 @keyframes reactor-rotate {
@@ -169,8 +198,8 @@ body::after {
 }
 
 @keyframes reactor-pulse {
-  0%, 100% { opacity: 0.9; transform: scale(1); box-shadow: 0 0 50px var(--neon-cyan), 0 0 100px rgba(0, 212, 255, 0.35); }
-  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 65px var(--neon-cyan), 0 0 120px rgba(0, 212, 255, 0.45); }
+  0%, 100% { opacity: 0.9; transform: scale(1); box-shadow: 0 0 50px var(--neon-blue), 0 0 100px rgba(0, 212, 255, 0.35); }
+  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 65px var(--neon-blue), 0 0 120px rgba(0, 212, 255, 0.45); }
 }
 
 @keyframes reactor-pulse-glow {
@@ -182,20 +211,11 @@ body::after {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 1.5rem;
   z-index: 10;
   position: relative;
-}
-
-.topbar h1 {
-  font-family: var(--font-mono);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  font-size: 1.5rem;
-  color: var(--neon-cyan);
-  text-shadow: var(--glow-cyan-weak);
-  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
 .durum-cubugu {
@@ -207,7 +227,7 @@ body::after {
   border-radius: var(--radius);
   padding: 0.5rem 1rem;
   backdrop-filter: blur(10px);
-  box-shadow: var(--glow-cyan-weak);
+  box-shadow: var(--glow-blue-weak);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -227,13 +247,17 @@ body::after {
   50% { opacity: 0.3; }
 }
 
+.durum-nokta.dinleniyor { background: var(--neon-amber); box-shadow: 0 0 12px var(--neon-amber); }
+.durum-nokta.conuşuyor { background: var(--neon-amber); box-shadow: 0 0 14px var(--neon-amber); }
+.durum-nokta.hata { background: var(--neon-red); box-shadow: 0 0 14px var(--neon-red); }
+
 /* ========== HUD Panel ========== */
 .panel {
   background: var(--bg-panel);
   backdrop-filter: blur(12px);
   border: var(--panel-border);
   border-radius: var(--radius);
-  box-shadow: var(--glow-cyan-weak);
+  box-shadow: var(--glow-blue-weak);
   padding: 1.5rem;
 }
 
@@ -288,7 +312,7 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--neon-cyan);
+  border-color: var(--neon-blue);
   box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
 }
 
@@ -308,7 +332,7 @@ button {
 
 button:hover {
   background: rgba(32, 50, 80, 0.95);
-  border-color: var(--neon-cyan);
+  border-color: var(--neon-blue);
   box-shadow: 0 0 18px rgba(0, 212, 255, 0.25);
 }
 
@@ -316,8 +340,8 @@ button:active { transform: translateY(1px); }
 
 button.vurgulu {
   background: rgba(0, 212, 255, 0.15);
-  border-color: var(--neon-cyan);
-  color: var(--neon-cyan);
+  border-color: var(--neon-blue);
+  color: var(--neon-blue);
   text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
 }
 
@@ -338,16 +362,16 @@ button.mikrofon {
 }
 
 button.mikrofon.kayitli {
-  background: rgba(255, 62, 62, 0.2);
-  border-color: var(--neon-red);
-  color: var(--neon-red);
-  box-shadow: var(--glow-red);
+  background: rgba(255, 171, 0, 0.2);
+  border-color: var(--neon-amber);
+  color: var(--neon-amber);
+  box-shadow: var(--glow-amber);
   animation: mic-pulse 1.5s infinite;
 }
 
 @keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 62, 62, 0.4); transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 171, 0, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 171, 0, 0.4); transform: scale(1.05); }
 }
 
 /* ========== Sekmalar ========== */
@@ -382,9 +406,9 @@ button.mikrofon.kayitli {
 
 .sekme-acik {
   background: rgba(20, 34, 56, 0.95);
-  border-color: var(--neon-cyan);
+  border-color: var(--neon-blue);
   opacity: 1;
-  color: var(--neon-cyan);
+  color: var(--neon-blue);
   text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
   box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
 }
@@ -431,9 +455,9 @@ button.mikrofon.kayitli {
 
 .chip-acik {
   opacity: 1;
-  border-color: var(--neon-cyan);
+  border-color: var(--neon-blue);
   background: rgba(0, 212, 255, 0.18);
-  color: var(--neon-cyan);
+  color: var(--neon-blue);
   box-shadow: 0 0 18px rgba(0, 212, 255, 0.3);
 }
 
@@ -447,9 +471,9 @@ button.mikrofon.kayitli {
   font-size: 0.65rem;
   padding: 0.15rem 0.5rem;
   background: rgba(0, 212, 255, 0.1);
-  border: 1px solid var(--neon-cyan);
+  border: 1px solid var(--neon-blue);
   border-radius: 0.5rem;
-  color: var(--neon-cyan);
+  color: var(--neon-blue);
   margin-left: 0.5rem;
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
 }
@@ -486,9 +510,9 @@ button.mikrofon.kayitli {
 
 .mesaj-avatar.jarvis {
   background: rgba(0, 212, 255, 0.15);
-  border: 1px solid var(--neon-cyan);
-  color: var(--neon-cyan);
-  box-shadow: var(--glow-cyan-weak);
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  box-shadow: var(--glow-blue-weak);
 }
 
 .mesaj-avatar.ben {
@@ -631,9 +655,9 @@ button.mikrofon.kayitli {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  color: var(--neon-cyan);
+  color: var(--neon-blue);
   margin: 0 0 0.9rem;
-  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 136, 255, 0.2);
   padding-bottom: 0.4rem;
 }
 
@@ -664,16 +688,45 @@ button.mikrofon.kayitli {
   margin: 0;
 }
 
+.jarvis-baslik {
+  text-align: center;
+  margin-top: auto;
+  padding-bottom: 2rem;
+  z-index: 10;
+  position: relative;
+}
+
+.jarvis-baslik h1 {
+  font-family: var(--font-mono);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  color: var(--neon-blue);
+  text-shadow: var(--glow-blue);
+  margin: 0;
+  line-height: 1;
+}
+
+.jarvis-alt-yazi {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 640px) {
   #root { padding: 0.75rem; }
-  .reactor { width: 200px; height: 200px; top: 1rem; right: 1rem; }
-  .reactor-tunnel { width: 140px; height: 140px; top: 30px; left: 30px; }
-  .reactor-core { width: 60px; height: 60px; top: 70px; left: 70px; }
+  .reactor { width: 220px; height: 220px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .reactor-tunnel { width: 140px; height: 140px; top: 40px; left: 40px; }
+  .reactor-core { width: 60px; height: 60px; top: 80px; left: 80px; }
   .reactor-ring::after { inset: -2px; }
   .mesaj-baloncuk { max-width: 85%; }
-  h1 { font-size: 1.1rem; }
-  .topbar { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .jarvis-baslik h1 { font-size: 1.8rem; }
+  .topbar { gap: 0.6rem; }
   .panel { padding: 1rem; }
   .mesaj-liste { gap: 0.7rem; }
 }

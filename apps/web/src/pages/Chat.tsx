@@ -14,7 +14,7 @@ const ROZET_LABEL: Record<string, string> = {
   siber: 'Siber Güvenlik', ogretmen: 'Öğretmen', yazar: 'Yazar', planlayici: 'Planlayıcı',
 };
 
-export default function Chat({ goSettings }: { goSettings?: () => void }) {
+export default function Chat({ goSettings, setDurum }: { goSettings?: () => void; setDurum?: (d: 'hazir' | 'dinleniyor' | 'konusuyor' | 'hata') => void }) {
   const { msgs, approvals, offline, send } = useChat('ana');
   const [text, setText] = useState('');
   const [badges, setBadges] = useState<Badge[]>(['chat']);
@@ -41,12 +41,14 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
       return;
     }
     try {
+      setDurum?.('dinleniyor');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
       chunks.current = [];
       mr.ondataavailable = (e) => chunks.current.push(e.data);
       mr.onstop = async () => {
         setKaydediyor(false);
+        setDurum?.('konusuyor');
         const blob = new Blob(chunks.current, { type: 'audio/webm' });
         const r = await fetch('/api/stt', { method: 'POST', body: blob });
         const { text: t } = (await r.json()) as { text: string };
@@ -56,12 +58,18 @@ export default function Chat({ goSettings }: { goSettings?: () => void }) {
           const url = URL.createObjectURL(await tts.blob());
           await new Audio(url).play().catch(() => undefined);
         }
+        setDurum?.('hazir');
+      };
+      mr.onerror = () => {
+        setKaydediyor(false);
+        setDurum?.('hata');
       };
       rec.current = mr;
       mr.start();
       setKaydediyor(true);
     } catch {
       setKaydediyor(false);
+      setDurum?.('hata');
     }
   }
 
