@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
-import Chat from './pages/Chat.js';
-import Settings from './pages/Settings.js';
 
 export default function App() {
-  const [sayfa, setSayfa] = useState<'sohbet' | 'ayarlar'>('sohbet');
   const [durum, setDurum] = useState<'hazir' | 'dinleniyor' | 'konusuyor' | 'hata'>('hazir');
+  const [saat, setSaat] = useState('');
+
+  useEffect(() => {
+    const tick = () => setSaat(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -15,45 +20,124 @@ export default function App() {
   }, []);
 
   return (
-    <main className="min-h-screen p-4" style={{ fontFamily: 'var(--font-display)', display: 'grid', gridTemplateColumns: '280px 420px 1fr', gap: '2rem' }}>
-      <div className="sol-panel kenar-sohbet">
-        <div className="topbar">
-          <div className="durum-cubugu">
-            <div className={`durum-nokta ${durum === 'dinleniyor' || durum === 'konusuyor' ? 'dinleniyor' : durum === 'hata' ? 'hata' : ''}`}></div>
-            <span>{durum === 'dinleniyor' ? 'dinleniyor' : durum === 'konusuyor' ? 'konusuyor' : durum === 'hata' ? 'hata' : 'sistem hazir'}</span>
+    <div className="hud-app">
+      <header className="hud-topbar">
+        <div className="hud-brand">JARVIS</div>
+        <div className="hud-sub">MK1 HUD // LOCAL-FIRST OPERATING SYSTEM</div>
+        <div className="hud-right">
+          <span className="hud-chip">LOCAL MODE</span>
+          <span className="hud-chip">MKI HUD</span>
+          <span className="hud-saat">{saat}</span>
+        </div>
+      </header>
+
+      <main className="hud-grid">
+        <aside className="hud-sol">
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">MISSION CONTROL</div>
+            <div className="hud-tarih">FRI, JUN 12, 2026</div>
+            <div className="hud-buyuk-saat">{saat}</div>
+            <div className="hud-kucuk-yazi">Local command node</div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">WEATHER</div>
+            <div className="hud-sicaklik">76°F</div>
+            <div className="hud-hava-durum">Clear sky // feels 79°F</div>
+            <div className="hud-kucuk-yazi">Fenton, Michigan, US</div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">TODAY'S PLAN</div>
+            <div className="hud-plan-satir">0 OPEN</div>
+            <div className="hud-kucuk-yazi">0 due today // 0 overdue // 0 reminders // 1 events</div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">ACTION BRIEFS</div>
+            <div className="hud-brief"><span className="hud-brief-baslik">READY</span><br/><span className="hud-kucuk-yazi">Prepared written briefing</span></div>
+            <div className="hud-brief"><span className="hud-brief-baslik">DAY</span><br/><span className="hud-kucuk-yazi">Build today's work blocks</span></div>
+            <div className="hud-brief"><span className="hud-brief-baslik">BRIEF</span><br/><span className="hud-kucuk-yazi">Ranked open loops</span></div>
+            <div className="hud-brief"><span className="hud-brief-baslik">EVENING</span><br/><span className="hud-kucuk-yazi">Close loops and carry forward</span></div>
+          </section>
+        </aside>
+
+        <section className="hud-orta">
+          <div className={`reaktör ${durum !== 'hazir' ? durum : ''}`} aria-hidden="true">
+            <div className="reaktör-glow"></div>
+            <div className="reaktör-core-container">
+              <div className={`reaktör-core ${durum !== 'hazir' ? durum : ''}`}></div>
+              <div className="reaktör-tunnel"></div>
+              <div className="reaktör-ring"></div>
+              <div className="reaktör-dot d1"></div>
+              <div className="reaktör-dot d2"></div>
+              <div className="reaktör-dot d3"></div>
+              <div className="reaktör-dot d4"></div>
+              <div className="reaktör-dot d5"></div>
+              <div className="reaktör-dot d6"></div>
+            </div>
+            <div className="reaktör-status">{durum === 'dinleniyor' ? 'dinleniyor' : durum === 'konusuyor' ? 'konusuyor' : durum === 'hata' ? 'hata' : 'hazir'}</div>
+            <div className="reaktör-logo">J.A.R.V.I.S.</div>
+            <div className="reaktör-alt">LOCAL INTELLIGENCE CORE</div>
+          </div>
+        </section>
+
+        <aside className="hud-sag">
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">ACTIVITY LOG</div>
+            <div className="hud-log-satir">SYS: HUD initialized.</div>
+            <div className="hud-log-satir">SYS: Waiting for local core...</div>
+            <div className="hud-log-satir">SYS: Microphone capture ready. OpenAI transcription is preferred.</div>
+            <div className="hud-log-satir">SYS: JARVIS local core online</div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">AGENDA</div>
+            <div className="hud-agenda-satir">Sync Up — CALENDAR // Jun 12, 2:30 PM</div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">APPROVALS</div>
+            <div className="hud-kucuk-yazi">No pending approvals.</div>
+          </section>
+        </aside>
+      </main>
+
+      <footer className="hud-altbar">
+        <div className="hud-metrik">
+          <div className="hud-metrik-blok">
+            <span className="hud-metrik-label">CPU</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '56%' }}></div></div>
+            <span className="hud-metrik-deger">56%</span>
+          </div>
+          <div className="hud-metrik-blok">
+            <span className="hud-metrik-label">MEMORY</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '94%' }}></div></div>
+            <span className="hud-metrik-deger">94%</span>
+          </div>
+          <div className="hud-metrik-blok">
+            <span className="hud-metrik-label">DISK</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '95%' }}></div></div>
+            <span className="hud-metrik-deger">95%</span>
+          </div>
+          <div className="hud-metrik-blok">
+            <span className="hud-metrik-label">CORE</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '100%' }}></div></div>
+            <span className="hud-metrik-deger">ONLINE</span>
           </div>
         </div>
-        <div className="sekmeler">
-          <button className={sayfa === 'sohbet' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('sohbet')}>sohbet</button>
-          <button className={sayfa === 'ayarlar' ? 'sekme sekme-acik' : 'sekme'} onClick={() => setSayfa('ayarlar')}>ayarlar</button>
+        <div className="hud-bilgi">
+          <span className="hud-kucuk-yazi">UPTIME</span><span className="hud-deger">2D 12H</span>
+          <span className="hud-kucuk-yazi">PROCESS</span><span className="hud-deger">86940</span>
+          <span className="hud-kucuk-yazi">OS</span><span className="hud-deger">WIN</span>
         </div>
-        <div className="panel flex-1 flex flex-col" style={{ minHeight: '55vh' }}>
-          {sayfa === 'sohbet' ? <Chat goSettings={() => setSayfa('ayarlar')} setDurum={setDurum} /> : <Settings />}
+        <div className="hud-komut-alani">
+          <input
+            type="text"
+            className="hud-komut-input"
+            placeholder="Type a command or question..."
+          />
+          <button className="hud-buton mikrofon" title="Konuş">CLICK TO SPEAK</button>
+          <button className="hud-buton vurgulu">WAKE OFF</button>
+          <button className="hud-buton">DATA STUDIO</button>
+          <button className="hud-buton">CONFIGURE</button>
         </div>
-      </div>
-      <div className="orta-hud">
-        <div className={`reactor ${durum !== 'hazir' ? durum : ''}`} aria-hidden="true">
-          <div className="reactor-glow"></div>
-          <div className="reactor-core-container">
-            <div className={`reactor-core ${durum !== 'hazir' ? durum : ''}`}></div>
-            <div className="reactor-tunnel"></div>
-            <div className="reactor-ring"></div>
-            <div className="reactor-dot d1"></div>
-            <div className="reactor-dot d2"></div>
-            <div className="reactor-dot d3"></div>
-            <div className="reactor-dot d4"></div>
-            <div className="reactor-dot d5"></div>
-            <div className="reactor-dot d6"></div>
-          </div>
-          <div className="reactor-status">{durum === 'dinleniyor' ? 'dinleniyor' : durum === 'konusuyor' ? 'konusuyor' : durum === 'hata' ? 'hata' : 'hazir'}</div>
-          <div className="reactor-labels">J.A.R.V.I.S. — ONLINE</div>
-        </div>
-        <div className="jarvis-baslik">
-          <h1>J.A.R.V.I.S</h1>
-          <div className="jarvis-alt-yazi">Just A Rather Very Intelligent System</div>
-        </div>
-      </div>
-      <div className="sag-bos"></div>
-    </main>
+      </footer>
+    </div>
   );
 }
