@@ -51,4 +51,10 @@ describe('server', () => {
     expect(body).toHaveProperty('longitude');
     expect(body.current || body.current_weather).toBeDefined();
   });
+  it('lada qr rotasi calisir', async () => {
+    const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });
+    const res = await app.inject({ method: 'POST', url: '/api/lada/qr', payload: { qrData: 'TEST-QR-123' } });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toMatchObject({ ok: true, qrData: 'TEST-QR-123' });
+  });
 });

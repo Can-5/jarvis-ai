@@ -45,6 +45,11 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return upstream.json();
   });
 
+  app.post('/api/lada/qr', async (req) => {
+    const body = z.object({ qrData: z.string() }).parse(req.body);
+    return { ok: true, qrData: body.qrData, received: new Date().toISOString() };
+  });
+
   app.get('/api/status', async () => {
     const db = settingsDb();
     const saglayici = setting(db, 'saglayici', 'ollama');

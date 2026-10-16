@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import QRCode from 'jsqr';
 
 const WEATHER_CODES: Record<number, { ad: string; tr: string }> = {
   0: { ad: 'Clear sky', tr: 'Güneşli' },
@@ -40,6 +41,12 @@ export default function App() {
   const [saat, setSaat] = useState('');
   const [weather, setWeather] = useState<{ sicaklik: string; durum: string; konum: string } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [qrResult, setQrResult] = useState<string | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera'>('sohbet');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const tick = () => setSaat(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -83,6 +90,59 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const video = videoRef.current;
+      if (video) video.srcObject = stream;
+      setCameraActive(true);
+      setQrResult(null);
+    } catch (err) {
+      console.error('Kamera erişilemedi:', err);
+    }
+  };
+
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject as MediaStream | null;
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+      videoRef.current!.srcObject = null;
+    }
+    setCameraActive(false);
+    cancelAnimationFrame(rafRef.current);
+  };
+
+  const scanFrame = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !cameraActive) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = QRCode(imageData.data, imageData.width, imageData.height);
+    if (code) {
+      stopCamera();
+      setQrResult(code.data);
+      fetch('/api/lada/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrData: code.data }),
+      }).catch(() => {});
+    } else {
+      rafRef.current = requestAnimationFrame(scanFrame);
+    }
+  };
+
+  useEffect(() => {
+    if (cameraActive) {
+      rafRef.current = requestAnimationFrame(scanFrame);
+    }
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [cameraActive]);
+
   return (
     <div className="hud-app">
       <header className="hud-topbar">
@@ -92,6 +152,12 @@ export default function App() {
           <span className="hud-chip">YEREL MOD</span>
           <span className="hud-chip">MK1 HUD</span>
           <span className="hud-saat">{saat}</span>
+          <div className="mod-secici-kucuk">
+            <button className={`mod-buton-kucuk ${mod === 'sohbet' ? 'aktif' : ''}`} onClick={() => setMod('sohbet')}>💬</button>
+            <button className={`mod-buton-kucuk ${mod === 'ses' ? 'aktif' : ''}`} onClick={() => setMod('ses')}>🎤</button>
+            <button className={`mod-buton-kucuk ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️</button>
+            <button className={`mod-buton-kucuk ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => setMod('kamera')}>📷</button>
+          </div>
         </div>
       </header>
 
@@ -130,6 +196,15 @@ export default function App() {
             <div className="hud-brief"><span className="hud-brief-baslik">GÜN</span><br/><span className="hud-kucuk-yazi">Bugünün çalışma bloklarını oluştur</span></div>
             <div className="hud-brief"><span className="hud-brief-baslik">ÖZET</span><br/><span className="hud-kucuk-yazi">Sıralı açık döngüler</span></div>
             <div className="hud-brief"><span className="hud-brief-baslik">AKŞAM</span><br/><span className="hud-kucuk-yazi">Döngüleri kapat ve ileriye taşı</span></div>
+          </section>
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">MOD SEÇİCİ</div>
+            <div className="mod-secici">
+              <button className={`mod-buton ${mod === 'sohbet' ? 'aktif' : ''}`} onClick={() => setMod('sohbet')}>💬 SOHBET</button>
+              <button className={`mod-buton ${mod === 'ses' ? 'aktif' : ''}`} onClick={() => setMod('ses')}>🎤 SES</button>
+              <button className={`mod-buton ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️ SİBER</button>
+              <button className={`mod-buton ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => { setMod('kamera'); startCamera(); }}>📷 KAMERA</button>
+            </div>
           </section>
         </aside>
 
@@ -211,6 +286,22 @@ export default function App() {
           <button className="hud-buton">AYARLA</button>
         </div>
       </footer>
+
+      {cameraActive && (
+        <div className="kamera-overlay">
+          <video className="kamera-video" autoPlay playsInline ref={videoRef}></video>
+          <canvas className="kamera-video" ref={canvasRef} style={{ display: 'none' }}></canvas>
+          <div className="kamera-kontrol">
+            <button className="kamera-baslat" onClick={stopCamera}>KAMERAYI KAPAT</button>
+          </div>
+          {qrResult && (
+            <div className="kamera-sonuc">
+              <div className="hud-panel-baslik">QR KOD SONUÇ</div>
+              <div className="hud-kucuk-yazi">{qrResult}</div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
