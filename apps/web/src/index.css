@@ -167,6 +167,26 @@ body::after {
   animation: reactor-inner-pulse 2.5s ease-in-out infinite;
 }
 
+.reactor-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--neon-blue);
+  opacity: 0.5;
+  box-shadow: 0 0 8px var(--neon-blue);
+  animation: reactor-dot-pulse 2s ease-in-out infinite;
+}
+.reactor-dot.d1 { width: 4px; height: 4px; top: 34%; left: 39%; animation-delay: 0s; }
+.reactor-dot.d2 { width: 6px; height: 6px; top: 46%; left: 60%; animation-delay: 0.3s; }
+.reactor-dot.d3 { width: 3px; height: 3px; top: 56%; left: 48%; animation-delay: 0.6s; }
+.reactor-dot.d4 { width: 5px; height: 5px; top: 66%; left: 56%; animation-delay: 0.9s; }
+.reactor-dot.d5 { width: 4px; height: 4px; top: 40%; left: 59%; animation-delay: 1.2s; }
+.reactor-dot.d6 { width: 3px; height: 3px; top: 51%; left: 41%; animation-delay: 1.5s; }
+
+@keyframes reactor-dot-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); box-shadow: 0 0 5px currentColor; }
+  50% { opacity: 0.9; transform: scale(1.4); box-shadow: 0 0 14px currentColor; }
+}
+
 @keyframes reactor-inner-ring {
   0%, 100% { transform: scale(1); opacity: 0.4; }
   50% { transform: scale(1.7); opacity: 0; }
@@ -733,9 +753,9 @@ button.mikrofon.kayitli {
   font-family: var(--font-mono);
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-size: clamp(1.5rem, 6vw, 2rem);
   color: var(--neon-blue);
-  text-shadow: var(--glow-blue);
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
   margin: 0;
   line-height: 1;
 }
@@ -753,15 +773,20 @@ button.mikrofon.kayitli {
 .sol-panel {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 1.2rem;
 }
 
-.sag-panel {
+.orta-hud {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
   min-height: 0;
+}
+
+.sag-bos {
+  min-width: 0;
 }
 
 /* ========== Responsive ========== */
