@@ -362,10 +362,37 @@ export default function App() {
       setMod('siber');
     } else if (k.includes('guvenlik modu') || k.includes('guvenlik')) {
       setMod('guvenlik');
+    } else if (k.includes('koruma ac') || k.includes('korumayı ac')) {
+      setMod('guvenlik');
+      fetch('/api/protection/toggle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ on: true }) });
+    } else if (k.includes('koruma kapat') || k.includes('korumayı kapat')) {
+      setMod('guvenlik');
+      fetch('/api/protection/toggle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ on: false }) });
+    } else if (k.includes('mikrofon onar') || k.includes('mikrofonu onar')) {
+      setMod('guvenlik');
+      fetch('/api/mic/repair', { method: 'POST' });
+    } else if (k.includes('kamera liste') || k.includes('kameraları listele')) {
+      setMod('guvenlik');
+      fetch('/api/camera/list');
+    } else if (k.includes('antivirus tara') || k.includes('virüs tara')) {
+      setMod('guvenlik');
+      fetch('/api/av/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: fsScanPath || '/' }) });
     } else if (k.includes('sohbet')) {
       setMod('sohbet');
     }
     setKomut('');
+  };
+
+  const sesKayit = () => {
+    fetch('/api/voice/enroll', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'kullanici' }) });
+  };
+
+  const sesDogruLa = () => {
+    fetch('/api/voice/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'kullanici' }) });
+  };
+
+  const spoofTespit = () => {
+    fetch('/api/voice/spoof-check', { method: 'POST' });
   };
 
   const capturePhoto = () => {
@@ -542,6 +569,10 @@ export default function App() {
             <button className="hud-buton vurgulu" onClick={protectionToggle}>
               {protectionAcik ? 'Korumayı Kapat' : 'Korumayı Aç'}
             </button>
+            <div className="hud-kucuk-yazi">Ses Güvenliği</div>
+            <button className="hud-buton" onClick={sesKayit}>Ses Kaydı (Enroll)</button>
+            <button className="hud-buton" onClick={sesDogruLa}>Ses Doğrula</button>
+            <button className="hud-buton" onClick={spoofTespit}>Spoofing Tespit</button>
             <div className="hud-kucuk-yazi">Self-İyileştirme</div>
             <button className="hud-buton" onClick={selfAnalyze}>Kodu Analiz Et</button>
             <button className="hud-buton vurgulu" onClick={selfApply}>Güvenli Düzeltmeleri Uygula</button>
@@ -583,7 +614,7 @@ export default function App() {
           <input
             type="text"
             className="hud-komut-input"
-            placeholder="Bir komut veya soru yazın... (ör: 'kamera aç')"
+            placeholder="Komut yazın... (ör: 'kamera aç', 'koruma aç', 'mikrofon onar', 'antivirüs tara')"
             value={komut}
             onChange={(e) => setKomut(e.target.value)}
             onKeyDown={handleKomut}
