@@ -9,10 +9,18 @@ const OPENAI_COMPAT: Record<string, string> = {
 };
 
 function toOpenAiMessages(messages: ChatMessage[]) {
-  return messages.map((m) => ({
-    role: m.role === 'tool' ? 'tool' : m.role,
-    content: m.content,
-  }));
+  return messages.map((m) => {
+    const content: Array<{ type: 'text' | 'image_url'; text?: string; image_url?: { url: string } }> = [
+      { type: 'text', text: m.content },
+    ];
+    if (m.imageUrl) {
+      content.push({ type: 'image_url', image_url: { url: m.imageUrl } });
+    }
+    return {
+      role: m.role === 'tool' ? 'tool' : m.role,
+      content: content.length === 1 ? m.content : content,
+    };
+  });
 }
 
 async function completeOpenAiCompat(base: string, key: string, req: LlmRequest): Promise<LlmResponse> {
@@ -96,6 +104,10 @@ export async function complete(req: LlmRequest, ks: KeyStore): Promise<LlmRespon
   const base = OPENAI_COMPAT[req.provider];
   if (!base) throw new Error(`bilinmeyen saglayici: ${req.provider}`);
   return completeOpenAiCompat(base, key, req);
+}
+
+export function isVisionProvider(provider: ProviderId): boolean {
+  return ['ollama', 'openai', 'grok', 'openrouter'].includes(provider);
 }
 
 export type { ProviderId };

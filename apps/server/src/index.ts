@@ -8,7 +8,7 @@ import Database from 'better-sqlite3';
 import { join } from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { BadgeId, dataDir, type ProviderId } from '@jarvis/shared';
+import { BadgeId, ChatMessage, dataDir, type ProviderId } from '@jarvis/shared';
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
 import { telegramBot, type TelegramBotAdapter } from './telegram.js';
@@ -54,28 +54,32 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     const db = settingsDb();
     const saglayici = setting(db, 'saglayici', 'ollama');
     const model = setting(db, 'model', 'qwen3-coder:30b');
+    const visionProvider = setting(db, 'visionProvider', 'ollama');
+    const visionModel = setting(db, 'visionModel', 'llava');
     db.close();
     const keys: Record<string, boolean> = {};
     for (const p of ['gemini', 'claude', 'openai', 'grok', 'openrouter'] as const) {
       keys[p] = (await ks.get(p).catch(() => null)) !== null;
     }
-    return { saglayici, model, ollamaModels: await detectOllama().catch(() => []), keys };
+    return { saglayici, model, visionProvider, visionModel, ollamaModels: await detectOllama().catch(() => []), keys };
   });
 
   app.post('/api/chat', async (req) => {
-    const body = z.object({ conv: z.string(), text: z.string(), badges: BadgeId.array().default(['chat']) }).parse(req.body);
+    const body = z.object({ conv: z.string(), text: z.string(), badges: BadgeId.array().default(['chat']), imageUrl: z.string().optional(), vision: z.boolean().optional() }).parse(req.body);
     const history = mem.lastMessages(body.conv, 6).map((m) => `${m.role}: ${m.content}`);
     void history;
     const db = settingsDb();
     const kapali = new Set(
       body.badges.filter((b) => (db.prepare('SELECT v FROM settings WHERE k = ?').get(`rozet_${b}`) as { v: string } | undefined)?.v === 'kapali'),
     );
-    const provider = setting(db, 'saglayici', 'ollama') as ProviderId;
-    const model = setting(db, 'model', 'qwen3-coder:30b');
+    const useVision = body.vision === true;
+    const provider = useVision ? (setting(db, 'visionProvider', 'ollama') as ProviderId) : (setting(db, 'saglayici', 'ollama') as ProviderId);
+    const model = useVision ? setting(db, 'visionModel', 'llava') : setting(db, 'model', 'qwen3-coder:30b');
     db.close();
     const aktif = body.badges.filter((b) => !kapali.has(b));
+    const messages: ChatMessage[] = [{ role: 'user', content: body.text, ts: Date.now(), ...(body.imageUrl ? { imageUrl: body.imageUrl } : {}) }];
     try {
-      const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [], provider, model }, llm);
+      const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [], provider, model, vision: useVision }, llm as never);
       mem.saveTurn(body.conv, body.text, res.reply);
       return res;
     } catch (e) {

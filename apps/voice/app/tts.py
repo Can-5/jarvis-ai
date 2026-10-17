@@ -14,6 +14,13 @@ def voice_dir() -> Path:
     return d
 
 
+def list_voices() -> list[str]:
+    d = voice_dir()
+    if not d.exists():
+        return []
+    return sorted(p.stem for p in d.glob("*.onnx"))
+
+
 def synthesize(text: str, voice: str | None = None, speed: float = 1.0) -> bytes:
     v = voice or os.getenv("PIPER_VOICE", DEFAULT_VOICE)
     model = voice_dir() / f"{v}.onnx"

@@ -42,6 +42,8 @@ export default function App() {
   const [weather, setWeather] = useState<{ sicaklik: string; durum: string; konum: string } | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [qrResult, setQrResult] = useState<string | null>(null);
+  const [visionResult, setVisionResult] = useState<string | null>(null);
+  const [visionLoading, setVisionLoading] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera'>('sohbet');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -133,6 +135,38 @@ export default function App() {
       }).catch(() => {});
     } else {
       rafRef.current = requestAnimationFrame(scanFrame);
+    }
+  };
+
+  const captureFrameForVision = async () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    setVisionLoading(true);
+    try {
+      const r = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conv: 'kamera',
+          text: 'Bu gorselde neler goruyorsun? Turkce acikla.',
+          vision: true,
+          imageUrl: dataUrl,
+        }),
+      });
+      if (!r.ok) throw new Error(`sunucu hatasi ${r.status}`);
+      const json = await r.json();
+      setVisionResult(json.reply || 'analiz yapilamadi');
+    } catch (err) {
+      setVisionResult('gorsel analiz hatasi: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setVisionLoading(false);
     }
   };
 
@@ -292,8 +326,16 @@ export default function App() {
           <video className="kamera-video" autoPlay playsInline ref={videoRef}></video>
           <canvas className="kamera-video" ref={canvasRef} style={{ display: 'none' }}></canvas>
           <div className="kamera-kontrol">
-            <button className="kamera-baslat" onClick={stopCamera}>KAMERAYI KAPAT</button>
+            <button className="kamera-baslat" onClick={captureFrameForVision}>GÖRÜNTÜYÜ ANALİZ ET</button>
+            <button className="kamera-kapat" onClick={stopCamera}>KAMERAYI KAPAT</button>
           </div>
+          {visionLoading && <div className="kamera-sonuc">görüntü analiz ediliyor...</div>}
+          {visionResult && (
+            <div className="kamera-sonuc">
+              <div className="hud-panel-baslik">GÖRÜNTÜ ANALİZİ</div>
+              <div className="hud-kucuk-yazi">{visionResult}</div>
+            </div>
+          )}
           {qrResult && (
             <div className="kamera-sonuc">
               <div className="hud-panel-baslik">QR KOD SONUÇ</div>

@@ -13,6 +13,7 @@ export interface TurnInput {
   approvals: { tool: string; ok: boolean }[];
   conv?: string; wsDir?: string;
   provider: ProviderId; model: string;
+  vision?: boolean;
 }
 export interface TurnResult {
   reply: string;
@@ -50,7 +51,7 @@ export async function runTurn(input: TurnInput, llm: Llm): Promise<TurnResult> {
   const ks = new KeyStore();
   for (let i = 0; i < 5; i++) {
     const res = await llm.complete({
-      provider: input.provider, model: input.model,
+      provider: input.provider, model: input.model, vision: Boolean(input.vision),
       messages,
       tools: usable.map((t) => ({ name: t.name, describe: t.describe })),
     }, ks);

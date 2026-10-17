@@ -10,13 +10,70 @@
     "dev": "concurrently -n server,voice,web \"npm:dev -w apps/server\" \"npm:dev -w apps/voice\" \"npm:dev -w apps/web\"",
     "start": "npm:start -w apps/server",
     "electron": "electron ./electron/main.cjs",
-    "electron:build": "npm run build -w apps/server && npm run build -w apps/web && electron ./electron/main.js",
+    "electron:build": "npm run build -w apps/server && npm run build -w apps/web && electron-builder",
     "test": "npm run test --workspaces --if-present"
+  },
+  "build": {
+    "appId": "com.jarvis.ai",
+    "productName": "JARVIS",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/main.cjs",
+      "electron/preload.cjs",
+      "apps/server/dist/**/*",
+      "apps/web/dist/**/*",
+      "apps/voice/**/*",
+      "packages/**/dist/**/*",
+      "node_modules/**/*",
+      "data/**/*",
+      "bin/**/*",
+      "systemd/**/*",
+      "skills/**/*"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.cjs"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Utility",
+      "desktop": {
+        "Name": "JARVIS",
+        "Comment": "JARVIS AI Assistant",
+        "GenericName": "AI Assistant",
+        "Categories": "Utility;AI;"
+      }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "publisherName": "JARVIS AI"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "appImage": {
+      "category": "utility"
+    }
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
     "concurrently": "^9.1.2",
     "electron": "^44.8.0",
+    "electron-builder": "^25.1.0",
     "typescript": "^5.7.3",
     "vitest": "^3.2.4"
   }

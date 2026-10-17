@@ -721,6 +721,25 @@ body::after {
   box-shadow: 0 0 25px rgba(255, 171, 0, 0.4);
 }
 
+.kamera-kapat {
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 62, 62, 0.15);
+  color: var(--neon-red);
+  border: 1px solid var(--neon-red);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+  box-shadow: var(--glow-red);
+}
+
+.kamera-kapat:hover {
+  background: rgba(255, 62, 62, 0.25);
+  box-shadow: 0 0 25px rgba(255, 62, 62, 0.4);
+}
+
 .kamera-sonuc {
   position: absolute;
   top: 2rem;

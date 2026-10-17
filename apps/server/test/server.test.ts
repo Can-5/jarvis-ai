@@ -43,13 +43,27 @@ describe('server', () => {
     expect(res.statusCode).toBe(200);
   });
   it('weather rotasi calisir', async () => {
-    const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });
-    const res = await app.inject({ method: 'GET', url: '/api/weather?lat=42.8&lon=-83.7' });
-    expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body).toHaveProperty('latitude');
-    expect(body).toHaveProperty('longitude');
-    expect(body.current || body.current_weather).toBeDefined();
+    const origFetch = global.fetch;
+    vi.stubGlobal('fetch', async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        latitude: 42.8,
+        longitude: -83.7,
+        current_weather: { temperature: 24.5, weather_code: 0, wind_speed_10m: 12.3 },
+      }),
+    } as any));
+    try {
+      const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });
+      const res = await app.inject({ method: 'GET', url: '/api/weather?lat=42.8&lon=-83.7' });
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      expect(body).toHaveProperty('latitude');
+      expect(body).toHaveProperty('longitude');
+      expect(body.current || body.current_weather).toBeDefined();
+    } finally {
+      vi.stubGlobal('fetch', origFetch);
+    }
   });
   it('lada qr rotasi calisir', async () => {
     const app = await build({ llm: { complete: vi.fn(async () => ({ text: 'ok', toolCalls: [] })) } as never });

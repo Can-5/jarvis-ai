@@ -1,16 +1,20 @@
 import os
 import tempfile
+import wave
+import numpy as np
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from .stt import transcribe_file
+from .stt import transcribe_file, read_wav_mono
 from . import tts as tts_mod
 from .profile import load_profile, save_profile
 
 app = FastAPI(title="jarvis-voice")
 
 FAILOVER = {"mode": os.getenv("STT_MODE", "local")}
+
+VAD_THRESHOLD = float(os.getenv("VAD_THRESHOLD", "0.02"))
 
 @app.get("/health")
 def health():
@@ -59,6 +63,24 @@ def put_failover(body: dict):
         raise HTTPException(400, "mode local|cloud olmali")
     FAILOVER["mode"] = mode
     return {"ok": True, "mode": mode}
+
+
+@app.get("/voices")
+def list_voices():
+    return {"voices": tts_mod.list_voices(), "default": os.getenv("PIPER_VOICE", tts_mod.DEFAULT_VOICE)}
+
+
+@app.post("/vad")
+def vad(audio: UploadFile = File(...)):
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp.write(audio.file.read())
+        path = tmp.name
+    try:
+        audio_data = read_wav_mono(path)
+        rms = float(np.sqrt(np.mean(audio_data ** 2)))
+        return {"speech": rms > VAD_THRESHOLD, "rms": rms, "threshold": VAD_THRESHOLD}
+    finally:
+        os.unlink(path)
 
 
 class TtsIn(BaseModel):

@@ -16,6 +16,7 @@ export const ChatMessage = z.object({
   role: z.enum(['user', 'assistant', 'system', 'tool']),
   content: z.string(),
   ts: z.number(),
+  imageUrl: z.string().optional(),
 });
 export type ChatMessage = z.infer<typeof ChatMessage>;
 
@@ -28,6 +29,7 @@ export interface ToolCall { name: string; args: Record<string, unknown>; }
 export interface LlmRequest {
   provider: ProviderId; model: string; messages: ChatMessage[];
   tools?: Pick<ToolDef, 'name' | 'describe'>[];
+  vision?: boolean;
 }
 export interface LlmResponse { text: string; toolCalls: ToolCall[]; }
 
