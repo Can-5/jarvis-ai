@@ -8,7 +8,7 @@ import Database from 'better-sqlite3';
 import { join } from 'node:path';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { BadgeId, ChatMessage, dataDir, type ProviderId } from '@jarvis/shared';
+import { BadgeId, ChatMessage, Kisisilik, RuhHali, dataDir, type ProviderId } from '@jarvis/shared';
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
 import { allTools } from '@jarvis/tools';
@@ -267,6 +267,24 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return result.ok ? { applied: result.output } : { error: result.output };
   });
 
+  app.get('/api/personality', async () => {
+    const db = settingsDb();
+    const k = setting(db, 'kisisilik', 'friendly');
+    const r = setting(db, 'ruh_hali', 'notr');
+    db.close();
+    return { kisisilik: k, ruh_hali: r };
+  });
+
+  app.put('/api/personality', async (req) => {
+    const body = z.object({ kisisilik: z.string().optional(), ruh_hali: z.string().optional() }).parse(req.body);
+    const db = settingsDb();
+    const put = db.prepare('INSERT OR REPLACE INTO settings VALUES (?, ?)');
+    if (body.kisisilik) put.run('kisisilik', body.kisisilik);
+    if (body.ruh_hali) put.run('ruh_hali', body.ruh_hali);
+    db.close();
+    return { ok: true };
+  });
+
   app.post('/api/camera/resolution', async (req) => {
     const body = z.object({ width: z.number().optional(), height: z.number().optional() }).parse(req.body);
     const tools = allTools();
@@ -310,11 +328,13 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     const useVision = body.vision === true;
     const provider = useVision ? (setting(db, 'visionProvider', 'ollama') as ProviderId) : (setting(db, 'saglayici', 'ollama') as ProviderId);
     const model = useVision ? setting(db, 'visionModel', 'llava') : setting(db, 'model', 'qwen3-coder:30b');
+    const kisisilik = setting(db, 'kisisilik', 'friendly') as 'reserved' | 'friendly' | 'professional' | 'humorous' | 'strict' | 'empathetic' | 'curious' | 'confident';
+    const ruh_hali = setting(db, 'ruh_hali', 'notr') as 'mutlu' | 'uzgun' | 'notr' | 'heyecanli' | 'sakin' | 'enerjik' | 'merakli';
     db.close();
     const aktif = body.badges.filter((b) => !kapali.has(b));
     const messages: ChatMessage[] = [{ role: 'user', content: body.text, ts: Date.now(), ...(body.imageUrl ? { imageUrl: body.imageUrl } : {}) }];
     try {
-      const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [], provider, model, vision: useVision }, llm as never);
+      const res = await runTurn({ text: body.text, badges: aktif.length ? aktif : ['chat'], mode: 'normal', approvals: [], provider, model, vision: useVision, kisisilik, ruh_hali }, llm as never);
       mem.saveTurn(body.conv, body.text, res.reply);
       return res;
     } catch (e) {

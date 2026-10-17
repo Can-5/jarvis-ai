@@ -47,7 +47,7 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz' | 'sunumcu' | 'tasarimci' | 'cocuk' | 'yetiskin' | 'uretici' | 'tuketici'>('sohbet');
   const [komut, setKomut] = useState('');
   const [usbDevices, setUsbDevices] = useState<string>('');
   const [repairResult, setRepairResult] = useState<string>('');
@@ -62,6 +62,8 @@ export default function App() {
   const [cameraHeight, setCameraHeight] = useState<number>(720);
   const [snapshotInterval, setSnapshotInterval] = useState<number>(60);
   const [snapshotCount, setSnapshotCount] = useState<number>(10);
+  const [kisisilik, setKisisilik] = useState<'reserved' | 'friendly' | 'professional' | 'humorous' | 'strict' | 'empathetic' | 'curious' | 'confident'>('friendly');
+  const [ruh_hali, setRuhHali] = useState<'mutlu' | 'uzgun' | 'notr' | 'heyecanli' | 'sakin' | 'enerjik' | 'merakli'>('notr');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -237,6 +239,27 @@ export default function App() {
     } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
   };
 
+  const loadPersonality = async () => {
+    try {
+      const r = await fetch('/api/personality');
+      const d = await r.json();
+      setKisisilik(d.kisisilik);
+      setRuhHali(d.ruh_hali);
+    } catch (e) { setGuvenlikSonuc('Kisisilik yuklenemedi: ' + String(e)); }
+  };
+
+  const savePersonality = async () => {
+    try {
+      const r = await fetch('/api/personality', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kisisilik, ruh_hali }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.ok === 'boolean' && d.ok ? 'Kisisilik ve ruh hali kaydedildi.' : 'Kayit hatasi.');
+    } catch (e) { setGuvenlikSonuc('Kisisilik kaydedilemedi: ' + String(e)); }
+  };
+
   const selfAnalyze = async () => {
     try {
       const r = await fetch('/api/self/analyze', { method: 'POST' });
@@ -296,6 +319,7 @@ export default function App() {
       } catch {}
     }
     pollStats();
+    loadPersonality();
     const t = setInterval(pollStats, 2000);
     return () => { cancelled = true; clearInterval(t); };
   }, []);
@@ -417,6 +441,18 @@ export default function App() {
       setMod('ses_analiz');
     } else if (k.includes('veri analiz')) {
       setMod('veri_analiz');
+    } else if (k.includes('sunumcu') || k.includes('sunum')) {
+      setMod('sunumcu');
+    } else if (k.includes('tasarimci') || k.includes('tasarım')) {
+      setMod('tasarimci');
+    } else if (k.includes('cocuk') || k.includes('çocuk')) {
+      setMod('cocuk');
+    } else if (k.includes('yetiskin') || k.includes('yetişkin')) {
+      setMod('yetiskin');
+    } else if (k.includes('uretici') || k.includes('üretici')) {
+      setMod('uretici');
+    } else if (k.includes('tuketici') || k.includes('tüketici')) {
+      setMod('tuketici');
     }
     setKomut('');
   };
@@ -477,6 +513,14 @@ export default function App() {
             <button className={`mod-buton-kucuk ${mod === 'veri_studyo' ? 'aktif' : ''}`} onClick={() => setMod('veri_studyo')}>📊</button>
             <button className={`mod-buton-kucuk ${mod === 'sistem_izleme' ? 'aktif' : ''}`} onClick={() => setMod('sistem_izleme')}>📈</button>
             <button className={`mod-buton-kucuk ${mod === 'kamera_analiz' ? 'aktif' : ''}`} onClick={() => setMod('kamera_analiz')}>🔍</button>
+            <button className={`mod-buton-kucuk ${mod === 'ses_analiz' ? 'aktif' : ''}`} onClick={() => setMod('ses_analiz')}>🎵</button>
+            <button className={`mod-buton-kucuk ${mod === 'veri_analiz' ? 'aktif' : ''}`} onClick={() => setMod('veri_analiz')}>📋</button>
+            <button className={`mod-buton-kucuk ${mod === 'sunumcu' ? 'aktif' : ''}`} onClick={() => setMod('sunumcu')}>🎤</button>
+            <button className={`mod-buton-kucuk ${mod === 'tasarimci' ? 'aktif' : ''}`} onClick={() => setMod('tasarimci')}>🎨</button>
+            <button className={`mod-buton-kucuk ${mod === 'cocuk' ? 'aktif' : ''}`} onClick={() => setMod('cocuk')}>🧒</button>
+            <button className={`mod-buton-kucuk ${mod === 'yetiskin' ? 'aktif' : ''}`} onClick={() => setMod('yetiskin')}>🧑</button>
+            <button className={`mod-buton-kucuk ${mod === 'uretici' ? 'aktif' : ''}`} onClick={() => setMod('uretici')}>🏭</button>
+            <button className={`mod-buton-kucuk ${mod === 'tuketici' ? 'aktif' : ''}`} onClick={() => setMod('tuketici')}>🛒</button>
           </div>
         </div>
       </header>
@@ -531,6 +575,12 @@ export default function App() {
               <button className={`mod-buton ${mod === 'kamera_analiz' ? 'aktif' : ''}`} onClick={() => setMod('kamera_analiz')}>🔍 KAMERA ANALİZ</button>
               <button className={`mod-buton ${mod === 'ses_analiz' ? 'aktif' : ''}`} onClick={() => setMod('ses_analiz')}>🎵 SES ANALİZ</button>
               <button className={`mod-buton ${mod === 'veri_analiz' ? 'aktif' : ''}`} onClick={() => setMod('veri_analiz')}>📋 VERİ ANALİZ</button>
+              <button className={`mod-buton ${mod === 'sunumcu' ? 'aktif' : ''}`} onClick={() => setMod('sunumcu')}>🎤 SUNUMCU</button>
+              <button className={`mod-buton ${mod === 'tasarimci' ? 'aktif' : ''}`} onClick={() => setMod('tasarimci')}>🎨 TASARIMCI</button>
+              <button className={`mod-buton ${mod === 'cocuk' ? 'aktif' : ''}`} onClick={() => setMod('cocuk')}>🧒 ÇOCUK</button>
+              <button className={`mod-buton ${mod === 'yetiskin' ? 'aktif' : ''}`} onClick={() => setMod('yetiskin')}>🧑 YETİŞKİN</button>
+              <button className={`mod-buton ${mod === 'uretici' ? 'aktif' : ''}`} onClick={() => setMod('uretici')}>🏭 ÜRETİCİ</button>
+              <button className={`mod-buton ${mod === 'tuketici' ? 'aktif' : ''}`} onClick={() => setMod('tuketici')}>🛒 TÜKETİCİ</button>
             </div>
           </section>
         </aside>
@@ -630,6 +680,27 @@ export default function App() {
             <div className="hud-kucuk-yazi">Self-İyileştirme</div>
             <button className="hud-buton" onClick={selfAnalyze}>Kodu Analiz Et</button>
             <button className="hud-buton vurgulu" onClick={selfApply}>Güvenli Düzeltmeleri Uygula</button>
+            <div className="hud-kucuk-yazi">Kişilik ve Ruh Hali</div>
+            <select className="hud-komut-input" value={kisisilik} onChange={(e) => setKisisilik(e.target.value as any)}>
+              <option value="friendly">Samimi</option>
+              <option value="professional">Profesyonel</option>
+              <option value="reserved">Rezerv</option>
+              <option value="humorous">Mizahli</option>
+              <option value="strict">Sıkı</option>
+              <option value="empathetic">Empatik</option>
+              <option value="curious">Meraklı</option>
+              <option value="confident">Güvenli</option>
+            </select>
+            <select className="hud-komut-input" value={ruh_hali} onChange={(e) => setRuhHali(e.target.value as any)}>
+              <option value="notr">Nötr</option>
+              <option value="mutlu">Mutlu</option>
+              <option value="uzgun">Üzgün</option>
+              <option value="heyecanli">Heyecanlı</option>
+              <option value="sakin">Sakin</option>
+              <option value="enerjik">Enerjik</option>
+              <option value="merakli">Meraklı</option>
+            </select>
+            <button className="hud-buton vurgulu" onClick={savePersonality}>Kaydet</button>
             {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
           </section>
         ) : null}

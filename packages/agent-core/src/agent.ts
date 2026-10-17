@@ -4,7 +4,7 @@ import { decide, isDangerous, snapshot, type Mode } from '@jarvis/guard';
 import { allTools } from '@jarvis/tools';
 import { complete as defaultComplete } from '@jarvis/llm';
 import { KeyStore } from '@jarvis/llm';
-import type { BadgeId, ChatMessage, ProviderId, ToolCall } from '@jarvis/shared';
+import type { BadgeId, ChatMessage, Kisisilik, ProviderId, RuhHali, ToolCall } from '@jarvis/shared';
 
 export { BADGES };
 export interface VoiceProfile { subs: Record<string, string>; }
@@ -14,6 +14,8 @@ export interface TurnInput {
   conv?: string; wsDir?: string;
   provider: ProviderId; model: string;
   vision?: boolean;
+  kisisilik?: Kisisilik;
+  ruh_hali?: RuhHali;
 }
 export interface TurnResult {
   reply: string;
@@ -42,8 +44,11 @@ export async function runTurn(input: TurnInput, llm: Llm): Promise<TurnResult> {
   const allowed = new Set(input.badges.flatMap((b) => BADGES[b].tools));
   const usable = tools.filter((t) => allowed.size === 0 || allowed.has(t.name));
   const system = input.badges.map((b) => BADGES[b].prompt).join('\n');
+  const personalityDesc = input.kisisilik ? ` KISILLIK: ${input.kisisilik}` : '';
+  const moodDesc = input.ruh_hali ? ` RUH HALI: ${input.ruh_hali}` : '';
+  const fullSystem = system + personalityDesc + moodDesc;
   const messages: ChatMessage[] = [
-    { role: 'system', content: system, ts: 1 },
+    { role: 'system', content: fullSystem, ts: 1 },
     { role: 'user', content: input.text, ts: 2 },
   ];
   const approvals: TurnResult['approvals'] = [];
