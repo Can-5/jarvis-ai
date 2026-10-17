@@ -365,6 +365,35 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     });
   }
 
+  app.post('/api/voice/enroll', async (req) => {
+    const body = z.object({ user: z.string() }).parse(req.body);
+    const upstream = await fetch(`${VOICE()}/voice/enroll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return upstream.json();
+  });
+
+  app.post('/api/voice/verify', async (req) => {
+    const body = z.object({ user: z.string() }).parse(req.body);
+    const upstream = await fetch(`${VOICE()}/voice/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return upstream.json();
+  });
+
+  app.post('/api/voice/spoof-check', async () => {
+    const upstream = await fetch(`${VOICE()}/voice/spoof-check`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    return upstream.json();
+  });
+
   app.get('/api/voice-profile/:user', async (req) => {
     const { user } = req.params as { user: string };
     const r = await fetch(`${VOICE()}/profile/${encodeURIComponent(user)}`);
