@@ -58,6 +58,10 @@ export default function App() {
   const [fsScanPath, setFsScanPath] = useState('');
   const [guvenlikSonuc, setGuvenlikSonuc] = useState<string>('');
   const [protectionAcik, setProtectionAcik] = useState<boolean>(false);
+  const [cameraWidth, setCameraWidth] = useState<number>(1280);
+  const [cameraHeight, setCameraHeight] = useState<number>(720);
+  const [snapshotInterval, setSnapshotInterval] = useState<number>(60);
+  const [snapshotCount, setSnapshotCount] = useState<number>(10);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -246,6 +250,30 @@ export default function App() {
       const r = await fetch('/api/self/apply', { method: 'POST' });
       const d = await r.json();
       setGuvenlikSonuc(typeof d.applied === 'string' ? d.applied : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const kameraCozunurluk = async () => {
+    try {
+      const r = await fetch('/api/camera/resolution', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ width: cameraWidth, height: cameraHeight }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.resolution === 'string' ? d.resolution : JSON.stringify(d));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const zamanliSnapshot = async () => {
+    try {
+      const r = await fetch('/api/camera/snapshot-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intervalSeconds: snapshotInterval, count: snapshotCount }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.scheduled === 'string' ? d.scheduled : JSON.stringify(d));
     } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
   };
 
@@ -573,6 +601,14 @@ export default function App() {
             <button className="hud-buton" onClick={sesKayit}>Ses Kaydı (Enroll)</button>
             <button className="hud-buton" onClick={sesDogruLa}>Ses Doğrula</button>
             <button className="hud-buton" onClick={spoofTespit}>Spoofing Tespit</button>
+            <div className="hud-kucuk-yazi">Kamera Ayarları</div>
+            <input className="hud-komut-input" placeholder="Genişlik (px)" value={cameraWidth} onChange={(e) => setCameraWidth(Number(e.target.value))} />
+            <input className="hud-komut-input" placeholder="Yükseklik (px)" value={cameraHeight} onChange={(e) => setCameraHeight(Number(e.target.value))} />
+            <button className="hud-buton" onClick={kameraCozunurluk}>Çözünürlük Ayarla</button>
+            <div className="hud-kucuk-yazi">Zamanlanmış Snapshot</div>
+            <input className="hud-komut-input" placeholder="Aralık (saniye)" value={snapshotInterval} onChange={(e) => setSnapshotInterval(Number(e.target.value))} />
+            <input className="hud-komut-input" placeholder="Adet" value={snapshotCount} onChange={(e) => setSnapshotCount(Number(e.target.value))} />
+            <button className="hud-buton" onClick={zamanliSnapshot}>Zamanla</button>
             <div className="hud-kucuk-yazi">Self-İyileştirme</div>
             <button className="hud-buton" onClick={selfAnalyze}>Kodu Analiz Et</button>
             <button className="hud-buton vurgulu" onClick={selfApply}>Güvenli Düzeltmeleri Uygula</button>

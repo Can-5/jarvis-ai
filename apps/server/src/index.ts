@@ -267,6 +267,24 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return result.ok ? { applied: result.output } : { error: result.output };
   });
 
+  app.post('/api/camera/resolution', async (req) => {
+    const body = z.object({ width: z.number().optional(), height: z.number().optional() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_capture');
+    if (!tool) return { error: 'camera_capture toolu bulunamadi' };
+    const result = await tool.run({ width: body.width, height: body.height });
+    return result.ok ? { resolution: result.output } : { error: result.output };
+  });
+
+  app.post('/api/camera/snapshot-schedule', async (req) => {
+    const body = z.object({ intervalSeconds: z.number().optional(), count: z.number().optional() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_capture');
+    if (!tool) return { error: 'camera_capture toolu bulunamadi' };
+    const result = await tool.run({ intervalSeconds: body.intervalSeconds ?? 60, count: body.count ?? 10 });
+    return result.ok ? { scheduled: result.output } : { error: result.output };
+  });
+
   app.get('/api/status', async () => {
     const db = settingsDb();
     const saglayici = setting(db, 'saglayici', 'ollama');
