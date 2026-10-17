@@ -6,16 +6,16 @@ import { fileURLToPath } from 'node:url';
 export const Tier = z.enum(['L1', 'L2', 'L3', 'L4', 'L5', 'L6']);
 export type Tier = z.infer<typeof Tier>;
 
-export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik', 'veri_studyo', 'sistem_izleme', 'kamera_analiz', 'ses_analiz', 'veri_analiz', 'sunumcu', 'tasarimci', 'cocuk', 'yetiskin', 'uretici', 'tuketici']);
+export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik', 'veri_studyo', 'sistem_izleme', 'kamera_analiz', 'ses_analiz', 'veri_analiz', 'sunumcu', 'tasarimci', 'cocuk', 'yetiskin', 'uretici', 'tuketici', 'sanatci', 'muzikci', 'doktor', 'avukat', 'programci', 'seyahatci', 'filosof']);
 export type BadgeId = z.infer<typeof BadgeId>;
 
 export const ProviderId = z.enum(['ollama', 'gemini', 'claude', 'openai', 'grok', 'openrouter']);
 export type ProviderId = z.infer<typeof ProviderId>;
 
-export const Kisisilik = z.enum(['reserved', 'friendly', 'professional', 'humorous', 'strict', 'empathetic', 'curious', 'confident']);
+export const Kisisilik = z.enum(['reserved', 'friendly', 'professional', 'humorous', 'strict', 'empathetic', 'curious', 'confident', 'playful', 'serious', 'calm', 'creative', 'logical', 'emotional']);
 export type Kisisilik = z.infer<typeof Kisisilik>;
 
-export const RuhHali = z.enum(['mutlu', 'uzgun', 'notr', 'heyecanli', 'sakin', 'enerjik', 'sakin', 'merakli']);
+export const RuhHali = z.enum(['mutlu', 'uzgun', 'notr', 'heyecanli', 'sakin', 'enerjik', 'merakli', 'güvenli', 'endisel', 'rahat']);
 export type RuhHali = z.infer<typeof RuhHali>;
 
 export const ChatMessage = z.object({

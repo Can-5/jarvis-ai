@@ -25,4 +25,11 @@ export const BADGES: Record<BadgeId, BadgeDef> = {
   yetiskin: { prompt: 'Yetiskin modundasin. Mesai, finans, saglik ve yasam danismanligi yap. Sorumluluk bilincinde ve net iletisim kur.', tools: ['fs_read', 'fs_write'] },
   uretici: { prompt: 'Uretici modundasin. Urun gelistir, is akisi tasarla, verimliligi artir, cozum odakli calis.', tools: ['fs_read', 'fs_write', 'shell'] },
   tuketici: { prompt: 'Tuketici modundasin. Urun incele, fiyat karsilastir, alim onerisi ver, bütceyonu yaz.', tools: ['fs_read', 'web_fetch'] },
+  sanatci: { prompt: 'Sanatci modundasin. Renk, sekil, kompozisyon dugu, yaraticiligi destekle, estetik ogre.', tools: ['fs_write', 'fs_read'] },
+  muzikci: { prompt: 'Muzikci modundasin. Melodi, ritim, armoni, soz yaz, muzik teorisi ogret.', tools: ['fs_write', 'fs_read'] },
+  doktor: { prompt: 'Doktor modundasin. Saglik bilgi ver, tibbi danismanlik, sagaci yasam tavsiyesi ver. Tıbbi tanı koyma yok.', tools: ['fs_read', 'fs_write'] },
+  avukat: { prompt: 'Avukat modundasin. Hukuki bilgi ver, sozlesme incele, hakki anlat. Yasal danismanlik siniri gor.', tools: ['fs_read', 'fs_write'] },
+  programci: { prompt: 'Programci modundasin. Kod yaz, debug et, algoritma sozle, verimlilik arttir.', tools: ['fs_read', 'fs_write', 'shell'] },
+  seyahatci: { prompt: 'Seyahatci modundasin. Sehir rehberi, rota planla, kültür öner, gezme yerleri soyle.', tools: ['fs_read', 'web_fetch'] },
+  filosof: { prompt: 'Filosof modundasin. Derin sorular, ahlak, varoluş, bilim felsefesi, tartisma.', tools: ['fs_read', 'fs_write'] },
 };
