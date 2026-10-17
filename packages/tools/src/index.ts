@@ -126,5 +126,59 @@ export function allTools(): ToolDef[] {
         try { return ok(JSON.stringify(readdirSync(join(dataDir(), 'quarantine')))); }
         catch { return ok('[]'); }
       } },
+    { name: 'usb_list', tier: 'L3', danger: true, describe: 'baglanmis USB/disk cihazlarini listeler (lsblk). args: {}',
+      run: async () => {
+        try {
+          const { stdout } = await exec('lsblk', ['-J', '-o', 'NAME,SIZE,TYPE,MOUNTPOINT,MODEL']);
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'usb_copy', tier: 'L3', danger: true, describe: 'dosyayi USB/hedef dizine kopyalar. args: {src, dst}',
+      run: async (a) => {
+        const src = str(a.src, 'src');
+        const dst = str(a.dst, 'dst');
+        try {
+          await exec('cp', ['-r', src, dst]);
+          return ok(`kopyalandi: ${src} -> ${dst}`);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'fs_check', tier: 'L3', danger: true, describe: 'dosya sistemini kontrol eder (fsck -N dry-run). args: {device}',
+      run: async (a) => {
+        const device = str(a.device, 'device');
+        try {
+          const { stdout } = await exec('fsck', ['-N', device]);
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'fs_repair', tier: 'L3', danger: true, describe: 'dosya sistemini onarir (fsck -y). args: {device}',
+      run: async (a) => {
+        const device = str(a.device, 'device');
+        try {
+          const { stdout } = await exec('fsck', ['-y', device], { timeout: 300000 });
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'fs_scan', tier: 'L3', danger: true, describe: 'dizinde bozuk/geri yuklenemeyebilecek dosyalari tarar. args: {path}',
+      run: async (a) => {
+        const base = inside(str(a.wsDir, 'wsDir'), str(a.path, 'path'));
+        const corrupt: string[] = [];
+        const walk = (d: string): void => {
+          for (const e of readdirSync(d, { withFileTypes: true })) {
+            const f = join(d, e.name);
+            if (e.isDirectory()) walk(f);
+            else {
+              try {
+                const fd = require('node:fs').openSync(f, 'r');
+                require('node:fs').closeSync(fd);
+              } catch { corrupt.push(f); }
+            }
+          }
+        };
+        try {
+          if (require('node:fs').statSync(base).isDirectory()) walk(base);
+          else corrupt.push(base);
+          return ok(JSON.stringify({ corrupt, count: corrupt.length }));
+        } catch (e) { return fail(String(e)); }
+      } },
   ];
 }

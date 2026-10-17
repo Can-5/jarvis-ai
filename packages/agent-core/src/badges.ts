@@ -12,4 +12,5 @@ export const BADGES: Record<BadgeId, BadgeDef> = {
   ogretmen: { prompt: 'Ogretmen modundasin. Basit anlat, ornek ver, sonunda kucuk soru sor.', tools: [] },
   yazar: { prompt: 'Yazar modundasin. Duisgun Turkce, akici uslup, imla duzelt.', tools: ['fs_write'] },
   planlayici: { prompt: 'Planlayici modundasin. Hatirlatici ve notlari madde madde tut.', tools: ['fs_read', 'fs_write'] },
+  tamir: { prompt: 'Sistem tamir ve aritma modundasin. USB baglama, dosya yazma/kopyalama, dosya sistemi kontrol ve onar, bozuk dosya tarama yapabilirsin. HER ISLEM ONAY GEREKTIRIR. Zararlı komutlari calistirma.', tools: ['usb_list', 'usb_copy', 'fs_check', 'fs_repair', 'fs_scan'] },
 };

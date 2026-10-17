@@ -11,6 +11,7 @@ import { promisify } from 'node:util';
 import { BadgeId, ChatMessage, dataDir, type ProviderId } from '@jarvis/shared';
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
+import { allTools } from '@jarvis/tools';
 import { telegramBot, type TelegramBotAdapter } from './telegram.js';
 
 const VOICE = (): string => process.env.JARVIS_VOICE_URL ?? 'http://localhost:8765';
@@ -100,6 +101,52 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
   app.post('/api/lada/qr', async (req) => {
     const body = z.object({ qrData: z.string() }).parse(req.body);
     return { ok: true, qrData: body.qrData, received: new Date().toISOString() };
+  });
+
+  app.get('/api/usb/list', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'usb_list');
+    if (!tool) return { error: 'usb_list toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { devices: result.output } : { error: result.output };
+  });
+
+  app.post('/api/usb/copy', async (req) => {
+    const body = z.object({ src: z.string(), dst: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'usb_copy');
+    if (!tool) return { error: 'usb_copy toolu bulunamadi' };
+    const result = await tool.run({ src: body.src, dst: body.dst });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.get('/api/fs/check', async (req) => {
+    const q = req.query as { device?: string };
+    if (!q.device) return { error: 'device parametresi zorunlu' };
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'fs_check');
+    if (!tool) return { error: 'fs_check toolu bulunamadi' };
+    const result = await tool.run({ device: q.device });
+    return result.ok ? { check: result.output } : { error: result.output };
+  });
+
+  app.post('/api/fs/repair', async (req) => {
+    const body = z.object({ device: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'fs_repair');
+    if (!tool) return { error: 'fs_repair toolu bulunamadi' };
+    const result = await tool.run({ device: body.device });
+    return result.ok ? { repaired: result.output } : { error: result.output };
+  });
+
+  app.get('/api/fs/scan', async (req) => {
+    const q = req.query as { path?: string };
+    if (!q.path) return { error: 'path parametresi zorunlu' };
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'fs_scan');
+    if (!tool) return { error: 'fs_scan toolu bulunamadi' };
+    const result = await tool.run({ wsDir: dataDir(), path: q.path });
+    return result.ok ? { scan: result.output } : { error: result.output };
   });
 
   app.get('/api/status', async () => {

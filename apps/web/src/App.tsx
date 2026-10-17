@@ -47,8 +47,15 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir'>('sohbet');
   const [komut, setKomut] = useState('');
+  const [usbDevices, setUsbDevices] = useState<string>('');
+  const [repairResult, setRepairResult] = useState<string>('');
+  const [scanResult, setScanResult] = useState<string>('');
+  const [usbSrc, setUsbSrc] = useState('');
+  const [usbDst, setUsbDst] = useState('');
+  const [fsDevice, setFsDevice] = useState('');
+  const [fsScanPath, setFsScanPath] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -94,6 +101,54 @@ export default function App() {
     fetchWeather();
     return () => { cancelled = true; };
   }, []);
+
+  const listeleUsb = async () => {
+    try {
+      const r = await fetch('/api/usb/list');
+      const d = await r.json();
+      setUsbDevices(typeof d.devices === 'string' ? d.devices : JSON.stringify(d.devices));
+    } catch (e) { setUsbDevices('Hata: ' + String(e)); }
+  };
+
+  const kopyalaUsb = async () => {
+    try {
+      const r = await fetch('/api/usb/copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ src: usbSrc, dst: usbDst }),
+      });
+      const d = await r.json();
+      setRepairResult(d.ok ? d.output : ('Hata: ' + d.error));
+    } catch (e) { setRepairResult('Hata: ' + String(e)); }
+  };
+
+  const kontrolEtFs = async () => {
+    try {
+      const r = await fetch('/api/fs/check?device=' + encodeURIComponent(fsDevice));
+      const d = await r.json();
+      setRepairResult(d.check !== undefined ? d.check : ('Hata: ' + d.error));
+    } catch (e) { setRepairResult('Hata: ' + String(e)); }
+  };
+
+  const onarFs = async () => {
+    try {
+      const r = await fetch('/api/fs/repair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device: fsDevice }),
+      });
+      const d = await r.json();
+      setRepairResult(d.repaired !== undefined ? d.repaired : ('Hata: ' + d.error));
+    } catch (e) { setRepairResult('Hata: ' + String(e)); }
+  };
+
+  const taraFs = async () => {
+    try {
+      const r = await fetch('/api/fs/scan?path=' + encodeURIComponent(fsScanPath));
+      const d = await r.json();
+      setScanResult(d.scan !== undefined ? d.scan : ('Hata: ' + d.error));
+    } catch (e) { setScanResult('Hata: ' + String(e)); }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -243,6 +298,7 @@ export default function App() {
             <button className={`mod-buton-kucuk ${mod === 'ses' ? 'aktif' : ''}`} onClick={() => setMod('ses')}>🎤</button>
             <button className={`mod-buton-kucuk ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️</button>
             <button className={`mod-buton-kucuk ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => setMod('kamera')}>📷</button>
+            <button className={`mod-buton-kucuk ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧</button>
           </div>
         </div>
       </header>
@@ -290,6 +346,7 @@ export default function App() {
               <button className={`mod-buton ${mod === 'ses' ? 'aktif' : ''}`} onClick={() => setMod('ses')}>🎤 SES</button>
               <button className={`mod-buton ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️ SİBER</button>
               <button className={`mod-buton ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => { setMod('kamera'); startCamera(); }}>📷 KAMERA</button>
+              <button className={`mod-buton ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧 TAMIR</button>
             </div>
           </section>
         </aside>
@@ -318,21 +375,45 @@ export default function App() {
         </section>
 
         <aside className="hud-sag">
-          <section className="hud-panel">
-            <div className="hud-panel-baslik">ETKİNLIK GÜNÜĞÜ</div>
-            <div className="hud-log-satir">SYS: HUD başlatıldı.</div>
-            <div className="hud-log-satir">SYS: Yerel çekirdek bekleniyor...</div>
-            <div className="hud-log-satir">SYS: Mikrofon yakalama hazır. OpenAI transkripsiyon tercih ediliyor.</div>
-            <div className="hud-log-satir">SYS: JARVIS yerel çekirdek çevrimiçi</div>
-          </section>
-          <section className="hud-panel">
-            <div className="hud-panel-baslik">GÜNCELLEME</div>
-            <div className="hud-agenda-satir">Güncelleme — TAKVIM // 12 Haziran, 14:30</div>
-          </section>
-          <section className="hud-panel">
-            <div className="hud-panel-baslik">ONAYLAR</div>
-            <div className="hud-kucuk-yazi">Bekleyen onay yok.</div>
-          </section>
+          {mod === 'tamir' ? (
+            <section className="hud-panel">
+              <div className="hud-panel-baslik">SISTEM TAMIR</div>
+              <div className="hud-kucuk-yazi">USB Cihazlari</div>
+              <button className="hud-buton" onClick={listeleUsb}>Cihazlari Listele</button>
+              {usbDevices && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap' }}>{usbDevices}</div>}
+              <div className="hud-kucuk-yazi">Dosya Kopyala (USB'ye)</div>
+              <input className="hud-komut-input" placeholder="Kaynak dosya" value={usbSrc} onChange={(e) => setUsbSrc(e.target.value)} />
+              <input className="hud-komut-input" placeholder="Hedef USB yolu" value={usbDst} onChange={(e) => setUsbDst(e.target.value)} />
+              <button className="hud-buton vurgulu" onClick={kopyalaUsb}>Kopyala</button>
+              <div className="hud-kucuk-yazi">Dosya Sistemi Kontrol ve Onar</div>
+              <input className="hud-komut-input" placeholder="Aygit (orn: /dev/sdb1)" value={fsDevice} onChange={(e) => setFsDevice(e.target.value)} />
+              <button className="hud-buton" onClick={kontrolEtFs}>Kontrol Et</button>
+              <button className="hud-buton vurgulu" onClick={onarFs}>Onar (fsck -y)</button>
+              {repairResult && <div className="hud-kucuk-yazi">{repairResult}</div>}
+              <div className="hud-kucuk-yazi">Bozuk Dosya Tara</div>
+              <input className="hud-komut-input" placeholder="Tarama dizini" value={fsScanPath} onChange={(e) => setFsScanPath(e.target.value)} />
+              <button className="hud-buton" onClick={taraFs}>Tara</button>
+              {scanResult && <div className="hud-kucuk-yazi">{scanResult}</div>}
+            </section>
+          ) : (
+            <>
+              <section className="hud-panel">
+                <div className="hud-panel-baslik">ETKİNLIK GÜNÜĞÜ</div>
+                <div className="hud-log-satir">SYS: HUD başlatıldı.</div>
+                <div className="hud-log-satir">SYS: Yerel çekirdek bekleniyor...</div>
+                <div className="hud-log-satir">SYS: Mikrofon yakalama hazır. OpenAI transkripsiyon tercih ediliyor.</div>
+                <div className="hud-log-satir">SYS: JARVIS yerel çekirdek çevrimiçi</div>
+              </section>
+              <section className="hud-panel">
+                <div className="hud-panel-baslik">GÜNCELLEME</div>
+                <div className="hud-agenda-satir">Güncelleme — TAKVIM // 12 Haziran, 14:30</div>
+              </section>
+              <section className="hud-panel">
+                <div className="hud-panel-baslik">ONAYLAR</div>
+                <div className="hud-kucuk-yazi">Bekleyen onay yok.</div>
+              </section>
+            </>
+          )}
         </aside>
       </main>
 
