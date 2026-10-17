@@ -19,8 +19,8 @@ const fakeLlm = {
 };
 
 describe('rozetler', () => {
-  it('28 rozet tanimli', () => {
-    expect(Object.keys(BADGES)).toHaveLength(28);
+  it('35 rozet tanimli', () => {
+    expect(Object.keys(BADGES)).toHaveLength(35);
     expect(BADGES.siber.prompt).toMatch(/dry-run/i);
   });
 });
