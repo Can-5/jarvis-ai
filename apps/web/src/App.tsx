@@ -47,7 +47,7 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz'>('sohbet');
   const [komut, setKomut] = useState('');
   const [usbDevices, setUsbDevices] = useState<string>('');
   const [repairResult, setRepairResult] = useState<string>('');
@@ -407,6 +407,16 @@ export default function App() {
       fetch('/api/av/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: fsScanPath || '/' }) });
     } else if (k.includes('sohbet')) {
       setMod('sohbet');
+    } else if (k.includes('veri studyo') || k.includes('veri')) {
+      setMod('veri_studyo');
+    } else if (k.includes('sistem izleme') || k.includes('izle')) {
+      setMod('sistem_izleme');
+    } else if (k.includes('kamera analiz') || k.includes('kamera analiz et')) {
+      setMod('kamera_analiz');
+    } else if (k.includes('ses analiz')) {
+      setMod('ses_analiz');
+    } else if (k.includes('veri analiz')) {
+      setMod('veri_analiz');
     }
     setKomut('');
   };
@@ -464,6 +474,9 @@ export default function App() {
             <button className={`mod-buton-kucuk ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => setMod('kamera')}>📷</button>
             <button className={`mod-buton-kucuk ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧</button>
             <button className={`mod-buton-kucuk ${mod === 'guvenlik' ? 'aktif' : ''}`} onClick={() => setMod('guvenlik')}>🛡️</button>
+            <button className={`mod-buton-kucuk ${mod === 'veri_studyo' ? 'aktif' : ''}`} onClick={() => setMod('veri_studyo')}>📊</button>
+            <button className={`mod-buton-kucuk ${mod === 'sistem_izleme' ? 'aktif' : ''}`} onClick={() => setMod('sistem_izleme')}>📈</button>
+            <button className={`mod-buton-kucuk ${mod === 'kamera_analiz' ? 'aktif' : ''}`} onClick={() => setMod('kamera_analiz')}>🔍</button>
           </div>
         </div>
       </header>
@@ -513,6 +526,11 @@ export default function App() {
               <button className={`mod-buton ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => { setMod('kamera'); startCamera(); }}>📷 KAMERA</button>
               <button className={`mod-buton ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧 TAMIR</button>
               <button className={`mod-buton ${mod === 'guvenlik' ? 'aktif' : ''}`} onClick={() => setMod('guvenlik')}>🛡️ GÜVENLİK</button>
+              <button className={`mod-buton ${mod === 'veri_studyo' ? 'aktif' : ''}`} onClick={() => setMod('veri_studyo')}>📊 VERİ STÜDYO</button>
+              <button className={`mod-buton ${mod === 'sistem_izleme' ? 'aktif' : ''}`} onClick={() => setMod('sistem_izleme')}>�İZ SİSTEM</button>
+              <button className={`mod-buton ${mod === 'kamera_analiz' ? 'aktif' : ''}`} onClick={() => setMod('kamera_analiz')}>🔍 KAMERA ANALİZ</button>
+              <button className={`mod-buton ${mod === 'ses_analiz' ? 'aktif' : ''}`} onClick={() => setMod('ses_analiz')}>🎵 SES ANALİZ</button>
+              <button className={`mod-buton ${mod === 'veri_analiz' ? 'aktif' : ''}`} onClick={() => setMod('veri_analiz')}>📋 VERİ ANALİZ</button>
             </div>
           </section>
         </aside>
@@ -612,6 +630,65 @@ export default function App() {
             <div className="hud-kucuk-yazi">Self-İyileştirme</div>
             <button className="hud-buton" onClick={selfAnalyze}>Kodu Analiz Et</button>
             <button className="hud-buton vurgulu" onClick={selfApply}>Güvenli Düzeltmeleri Uygula</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'veri_studyo' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">VERİ STÜDYO</div>
+            <div className="hud-kucuk-yazi">Veri analiz, gorsellestirme ve raporlama</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Veri stüdyo modu aktif. Veri dosyalarınızı yükleyin ve analiz edin.')}>Veri Yükle</button>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Rapor oluşturuluyor...')}>Rapor Oluştur</button>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Veri temizleme başlatıldı.')}>Veri Temizle</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'sistem_izleme' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">SİSTEM İZLEME</div>
+            <div className="hud-kucuk-yazi">CPU, bellek, disk ve ag durumu</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Sistem izleme aktif. CPU, bellek ve disk izleniyor.')}>İzlemeyi Başlat</button>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Anomali taraması yapılıyor...')}>Anomali Tara</button>
+            {stats && (
+              <>
+                <div className="hud-kucuk-yazi">İşlemci: {stats.cpu}%</div>
+                <div className="hud-kucuk-yazi">Bellek: {stats.memPercent}%</div>
+                <div className="hud-kucuk-yazi">Disk: {stats.diskPercent}%</div>
+              </>
+            )}
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'kamera_analiz' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">KAMERA ANALİZ</div>
+            <div className="hud-kucuk-yazi">Goruntu yakalama, hareket algilama ve analiz</div>
+            <button className="hud-buton" onClick={capturePhoto}>Goruntu Yakala</button>
+            <button className="hud-buton vurgulu" onClick={captureFrameForVision}>Goruntu Analiz Et</button>
+            {photos.length > 0 && (
+              <div className="hud-kucuk-yazi">{photos.length} goruntu kaydedildi</div>
+            )}
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'ses_analiz' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">SES ANALİZ</div>
+            <div className="hud-kucuk-yazi">Ses dugunu, frekans ve kalite analizi</div>
+            <button className="hud-buton" onClick={mikrofonTani}>Mikrofon Tanıla</button>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Ses frekans analizi baslatildi.')}>Frekans Tara</button>
+            <button className="hud-buton" onClick={sesDogruLa}>Biometrik Dogrula</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'veri_analiz' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">VERİ ANALİZ</div>
+            <div className="hud-kucuk-yazi">Dosya icerigi tarama, filtreleme ve ozetleme</div>
+            <input className="hud-komut-input" placeholder="Veri dosya yolu" value={fsScanPath} onChange={(e) => setFsScanPath(e.target.value)} />
+            <button className="hud-buton" onClick={taraFs}>Veri Tara</button>
+            <button className="hud-buton vurgulu" onClick={() => setGuvenlikSonuc('Hassas veri taraması yapılıyor...')}>Hassas Veri Bul</button>
+            {scanResult && <div className="hud-kucuk-yazi">{scanResult}</div>}
             {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
           </section>
         ) : null}

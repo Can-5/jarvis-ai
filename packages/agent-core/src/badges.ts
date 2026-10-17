@@ -14,4 +14,9 @@ export const BADGES: Record<BadgeId, BadgeDef> = {
   planlayici: { prompt: 'Planlayici modundasin. Hatirlatici ve notlari madde madde tut.', tools: ['fs_read', 'fs_write'] },
   tamir: { prompt: 'Sistem tamir ve aritma modundasin. USB baglama, dosya yazma/kopyalama, dosya sistemi kontrol ve onar, bozuk dosya tarama yapabilirsin. HER ISLEM ONAY GEREKTIRIR. Zararlı komutlari calistirma.', tools: ['usb_list', 'usb_copy', 'fs_check', 'fs_repair', 'fs_scan'] },
   guvenlik: { prompt: 'Guvenlik asistani modundasin. Kamera listesi, mikrofon tanima/onarim, antivirus tarama, yukleme-oncesi tarama, koruma modu ve self-iyilestirme yapabilirsin. HER ISLEM ONAY GEREKTIRIR. Zararlı komutlari calistirma.', tools: ['camera_list', 'camera_capture', 'camera_motion_detect', 'camera_record', 'mic_diagnose', 'mic_repair', 'av_scan', 'av_quarantine', 'av_quarantine_list', 'pre_scan', 'protection_status', 'protection_toggle', 'self_analyze', 'self_apply'] },
+  veri_studyo: { prompt: 'Veri Studyo modundasin. Veri analiz, gorsellestirme, raporlama ve dosya islemlerini yonetersin. Rafinimize dusen verileri okunabilir hale getir.', tools: ['fs_read', 'fs_write'] },
+  sistem_izleme: { prompt: 'Sistem Izleme modundasin. CPU, bellek, disk, ag durumunu izle ve rapor ver. Anomali tespit et ve uyar.', tools: ['fs_read', 'system_stats'] },
+  kamera_analiz: { prompt: 'Kamera Analiz modundasin. Goruntu yakala, hareket algila, nesne tanima ve analiz raporu olustur.', tools: ['camera_capture', 'camera_motion_detect', 'camera_record'] },
+  ses_analiz: { prompt: 'Ses Analiz modundasin. Ses kaydin dugunu, frekans ve kaliteyi analiz et. Biometrik imza olustur.', tools: ['mic_diagnose', 'vad', 'wake_word'] },
+  veri_analiz: { prompt: 'Veri Analiz modundasin. Dosya icerigini tara, duzenle, filtrele ve ozetle. Hassas veri tespiti yap.', tools: ['fs_read', 'fs_scan', 'av_scan'] },
 };

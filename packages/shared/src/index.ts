@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 export const Tier = z.enum(['L1', 'L2', 'L3']);
 export type Tier = z.infer<typeof Tier>;
 
-export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik']);
+export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik', 'veri_studyo', 'sistem_izleme', 'kamera_analiz', 'ses_analiz', 'veri_analiz']);
 export type BadgeId = z.infer<typeof BadgeId>;
 
 export const ProviderId = z.enum(['ollama', 'gemini', 'claude', 'openai', 'grok', 'openrouter']);
