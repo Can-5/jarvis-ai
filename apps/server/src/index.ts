@@ -45,6 +45,58 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return upstream.json();
   });
 
+  app.get('/api/system-stats', async () => {
+    let cpuPercent = 0;
+    let memTotal: number | undefined;
+    let memFree: number | undefined;
+    let diskTotal: number | undefined;
+    let diskFree: number | undefined;
+
+    try {
+      const stat = await import('node:fs/promises').then((fs) => fs.readFile('/proc/stat', 'utf8'));
+      const cpuLine = stat.split('\n').find((l) => l.startsWith('cpu '));
+      if (cpuLine) {
+        const parts = cpuLine.split(/\s+/).slice(1).map(Number);
+        const total = parts.reduce((a, b) => a + b, 0);
+        const idle = parts[3] ?? 0;
+        cpuPercent = Math.round(((total - idle) / total) * 100);
+      }
+    } catch {}
+
+    try {
+      const meminfo = await import('node:fs/promises').then((fs) => fs.readFile('/proc/meminfo', 'utf8'));
+      const memTotalMatch = meminfo.match(/MemTotal:\s+(\d+)/);
+      const memAvailableMatch = meminfo.match(/MemAvailable:\s+(\d+)/);
+      if (memTotalMatch?.[1] && memAvailableMatch?.[1]) {
+        memTotal = parseInt(memTotalMatch[1], 10);
+        memFree = parseInt(memAvailableMatch[1], 10);
+      }
+    } catch {}
+
+    try {
+      const { exec } = await import('node:child_process');
+      const { stdout } = await promisify(exec)("df -B1 / 2>/dev/null | tail -1");
+      const parts = stdout.trim().split(/\s+/);
+      if (parts.length >= 6 && parts[1] && parts[3]) {
+        diskTotal = parseInt(parts[1], 10);
+        diskFree = parseInt(parts[3], 10);
+      }
+    } catch {}
+
+    const memUsed = (memTotal ?? 0) - (memFree ?? 0);
+    const diskUsed = (diskTotal ?? 0) - (diskFree ?? 0);
+
+    return {
+      cpu: cpuPercent,
+      memTotalMB: Math.round((memTotal ?? 0) / 1024),
+      memUsedMB: Math.round(memUsed / 1024),
+      memPercent: (memTotal ?? 0) > 0 ? Math.round((memUsed / (memTotal ?? 1)) * 100) : 0,
+      diskTotalGB: Math.round((diskTotal ?? 0) / (1024 * 1024 * 1024)),
+      diskUsedGB: Math.round(diskUsed / (1024 * 1024 * 1024)),
+      diskPercent: (diskTotal ?? 0) > 0 ? Math.round((diskUsed / (diskTotal ?? 1)) * 100) : 0,
+    };
+  });
+
   app.post('/api/lada/qr', async (req) => {
     const body = z.object({ qrData: z.string() }).parse(req.body);
     return { ok: true, qrData: body.qrData, received: new Date().toISOString() };

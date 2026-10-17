@@ -45,7 +45,10 @@ export default function App() {
   const [visionResult, setVisionResult] = useState<string | null>(null);
   const [visionLoading, setVisionLoading] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
+  const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
   const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera'>('sohbet');
+  const [komut, setKomut] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -90,6 +93,21 @@ export default function App() {
     }
     fetchWeather();
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function pollStats() {
+      try {
+        const r = await fetch('/api/system-stats');
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!cancelled) setStats({ cpu: d.cpu, memPercent: d.memPercent, diskPercent: d.diskPercent });
+      } catch {}
+    }
+    pollStats();
+    const t = setInterval(pollStats, 2000);
+    return () => { cancelled = true; clearInterval(t); };
   }, []);
 
   const startCamera = async () => {
@@ -168,6 +186,40 @@ export default function App() {
     } finally {
       setVisionLoading(false);
     }
+  };
+
+  const handleKomut = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    const k = komut.toLowerCase().replace(/[.,!?]/g, '').trim();
+    if (k.includes('kamera aç') || k.includes('kamerayı aç') || k.includes('kamera açar')) {
+      setMod('kamera');
+      startCamera();
+    } else if (k.includes('ses aç') || k.includes('sesli mod')) {
+      setMod('ses');
+    } else if (k.includes('siber mod') || k.includes('güvenlik')) {
+      setMod('siber');
+    } else if (k.includes('sohbet')) {
+      setMod('sohbet');
+    }
+    setKomut('');
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const zaman = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setPhotos((prev) => [{ dataUrl, zaman }, ...prev].slice(0, 20));
+    const link = document.createElement('a');
+    link.download = `jarvis-foto-${zaman.replace(/:/g, '-')}.jpg`;
+    link.href = dataUrl;
+    link.click();
   };
 
   useEffect(() => {
@@ -288,18 +340,18 @@ export default function App() {
         <div className="hud-metrik">
           <div className="hud-metrik-blok">
             <span className="hud-metrik-label">İŞLEMCİ</span>
-            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '56%' }}></div></div>
-            <span className="hud-metrik-deger">56%</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: `${stats?.cpu ?? 0}%` }}></div></div>
+            <span className="hud-metrik-deger">{stats?.cpu ?? 0}%</span>
           </div>
           <div className="hud-metrik-blok">
             <span className="hud-metrik-label">BELLEK</span>
-            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '94%' }}></div></div>
-            <span className="hud-metrik-deger">94%</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: `${stats?.memPercent ?? 0}%` }}></div></div>
+            <span className="hud-metrik-deger">{stats?.memPercent ?? 0}%</span>
           </div>
           <div className="hud-metrik-blok">
             <span className="hud-metrik-label">DİSK</span>
-            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: '95%' }}></div></div>
-            <span className="hud-metrik-deger">95%</span>
+            <div className="hud-progres"><div className="hud-progres-dolu" style={{ width: `${stats?.diskPercent ?? 0}%` }}></div></div>
+            <span className="hud-metrik-deger">{stats?.diskPercent ?? 0}%</span>
           </div>
           <div className="hud-metrik-blok">
             <span className="hud-metrik-label">ÇEKİRDEK</span>
@@ -313,7 +365,14 @@ export default function App() {
           <span className="hud-kucuk-yazi">İŞLETİM SİSTEMİ</span><span className="hud-deger">LINUX</span>
         </div>
         <div className="hud-komut-alani">
-          <input type="text" className="hud-komut-input" placeholder="Bir komut veya soru yazın..." />
+          <input
+            type="text"
+            className="hud-komut-input"
+            placeholder="Bir komut veya soru yazın... (ör: 'kamera aç')"
+            value={komut}
+            onChange={(e) => setKomut(e.target.value)}
+            onKeyDown={handleKomut}
+          />
           <button className="hud-buton mikrofon" title="Konuş">KONUŞMAK İÇİN TIKLA</button>
           <button className="hud-buton vurgulu">UYANDIRMA KAPALI</button>
           <button className="hud-buton">VERİ STÜDYO</button>
@@ -326,6 +385,7 @@ export default function App() {
           <video className="kamera-video" autoPlay playsInline ref={videoRef}></video>
           <canvas className="kamera-video" ref={canvasRef} style={{ display: 'none' }}></canvas>
           <div className="kamera-kontrol">
+            <button className="kamera-baslat" onClick={capturePhoto}>FOTOĞRAF ÇEK</button>
             <button className="kamera-baslat" onClick={captureFrameForVision}>GÖRÜNTÜYÜ ANALİZ ET</button>
             <button className="kamera-kapat" onClick={stopCamera}>KAMERAYI KAPAT</button>
           </div>
@@ -340,6 +400,19 @@ export default function App() {
             <div className="kamera-sonuc">
               <div className="hud-panel-baslik">QR KOD SONUÇ</div>
               <div className="hud-kucuk-yazi">{qrResult}</div>
+            </div>
+          )}
+          {photos.length > 0 && (
+            <div className="kamera-galeri">
+              <div className="hud-panel-baslik">FOTOĞRAF GALERİSİ</div>
+              <div className="galeri-izgara">
+                {photos.map((p, i) => (
+                  <div key={i} className="galeri-kare">
+                    <img src={p.dataUrl} alt="fotoğraf" />
+                    <div className="galeri-zaman">{p.zaman}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

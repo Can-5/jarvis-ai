@@ -95,3 +95,23 @@ def tts(inp: TtsIn):
         raise HTTPException(400, "bos metin")
     wav = tts_mod.synthesize(inp.text, inp.voice, inp.speed)
     return Response(content=wav, media_type="audio/wav")
+
+
+WAKE_WORDS = ["jarvis", "j.a.r.v.i.s", "jervis", "yarvis"]
+
+
+@app.post("/wake-word")
+def wake_word(audio: UploadFile = File(...)):
+    """Ses dosyasinda uyandirma kelimesi (JARVIS) var mi kontrol eder."""
+    if FAILOVER["mode"] == "cloud":
+        raise HTTPException(501, "bulut STT henuz bagli degil")
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp.write(audio.file.read())
+        path = tmp.name
+    try:
+        text, lang = transcribe_file(path)
+        text_lower = text.lower().replace(".", "").replace(" ", "")
+        detected = any(ww.replace(".", "").replace(" ", "") in text_lower for ww in WAKE_WORDS)
+        return {"detected": detected, "text": text, "lang": lang}
+    finally:
+        os.unlink(path)
