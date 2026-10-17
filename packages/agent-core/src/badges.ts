@@ -13,4 +13,5 @@ export const BADGES: Record<BadgeId, BadgeDef> = {
   yazar: { prompt: 'Yazar modundasin. Duisgun Turkce, akici uslup, imla duzelt.', tools: ['fs_write'] },
   planlayici: { prompt: 'Planlayici modundasin. Hatirlatici ve notlari madde madde tut.', tools: ['fs_read', 'fs_write'] },
   tamir: { prompt: 'Sistem tamir ve aritma modundasin. USB baglama, dosya yazma/kopyalama, dosya sistemi kontrol ve onar, bozuk dosya tarama yapabilirsin. HER ISLEM ONAY GEREKTIRIR. Zararlı komutlari calistirma.', tools: ['usb_list', 'usb_copy', 'fs_check', 'fs_repair', 'fs_scan'] },
+  guvenlik: { prompt: 'Guvenlik asistani modundasin. Kamera listesi, mikrofon tanima/onarim, antivirus tarama, yukleme-oncesi tarama, koruma modu ve self-iyilestirme yapabilirsin. HER ISLEM ONAY GEREKTIRIR. Zararlı komutlari calistirma.', tools: ['camera_list', 'camera_capture', 'camera_motion_detect', 'camera_record', 'mic_diagnose', 'mic_repair', 'av_scan', 'av_quarantine', 'av_quarantine_list', 'pre_scan', 'protection_status', 'protection_toggle', 'self_analyze', 'self_apply'] },
 };

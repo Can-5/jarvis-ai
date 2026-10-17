@@ -149,6 +149,124 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return result.ok ? { scan: result.output } : { error: result.output };
   });
 
+  app.get('/api/camera/list', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_list');
+    if (!tool) return { error: 'camera_list toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { cameras: result.output } : { error: result.output };
+  });
+
+  app.post('/api/camera/capture', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_capture');
+    if (!tool) return { error: 'camera_capture toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { captured: result.output } : { error: result.output };
+  });
+
+  app.get('/api/camera/motion', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_motion_detect');
+    if (!tool) return { error: 'camera_motion_detect toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { motion: result.output } : { error: result.output };
+  });
+
+  app.post('/api/camera/record', async (req) => {
+    const body = z.object({ seconds: z.number().optional() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'camera_record');
+    if (!tool) return { error: 'camera_record toolu bulunamadi' };
+    const result = await tool.run({ seconds: body.seconds ?? 10 });
+    return result.ok ? { recorded: result.output } : { error: result.output };
+  });
+
+  app.post('/api/mic/diagnose', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'mic_diagnose');
+    if (!tool) return { error: 'mic_diagnose toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { diagnose: result.output } : { error: result.output };
+  });
+
+  app.post('/api/mic/repair', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'mic_repair');
+    if (!tool) return { error: 'mic_repair toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { repaired: result.output } : { error: result.output };
+  });
+
+  app.post('/api/av/scan', async (req) => {
+    const body = z.object({ path: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'av_scan');
+    if (!tool) return { error: 'av_scan toolu bulunamadi' };
+    const result = await tool.run({ path: body.path });
+    return result.ok ? { scan: result.output } : { error: result.output };
+  });
+
+  app.post('/api/av/quarantine', async (req) => {
+    const body = z.object({ path: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'av_quarantine');
+    if (!tool) return { error: 'av_quarantine toolu bulunamadi' };
+    const result = await tool.run({ path: body.path });
+    return result.ok ? { quarantined: result.output } : { error: result.output };
+  });
+
+  app.get('/api/av/quarantine-list', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'av_quarantine_list');
+    if (!tool) return { error: 'av_quarantine_list toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { quarantined: result.output } : { error: result.output };
+  });
+
+  app.post('/api/pre-scan', async (req) => {
+    const body = z.object({ path: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'pre_scan');
+    if (!tool) return { error: 'pre_scan toolu bulunamadi' };
+    const result = await tool.run({ path: body.path });
+    return result.ok ? { prescan: result.output } : { error: result.output };
+  });
+
+  app.get('/api/protection/status', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'protection_status');
+    if (!tool) return { error: 'protection_status toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { status: result.output } : { error: result.output };
+  });
+
+  app.post('/api/protection/toggle', async (req) => {
+    const body = z.object({ on: z.boolean() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'protection_toggle');
+    if (!tool) return { error: 'protection_toggle toolu bulunamadi' };
+    const result = await tool.run({ on: body.on });
+    return result.ok ? { toggled: result.output } : { error: result.output };
+  });
+
+  app.post('/api/self/analyze', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'self_analyze');
+    if (!tool) return { error: 'self_analyze toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { analysis: result.output } : { error: result.output };
+  });
+
+  app.post('/api/self/apply', async (req) => {
+    const body = z.object({ fix: z.string().optional() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'self_apply');
+    if (!tool) return { error: 'self_apply toolu bulunamadi' };
+    const result = await tool.run({ fix: body.fix });
+    return result.ok ? { applied: result.output } : { error: result.output };
+  });
+
   app.get('/api/status', async () => {
     const db = settingsDb();
     const saglayici = setting(db, 'saglayici', 'ollama');

@@ -47,7 +47,7 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik'>('sohbet');
   const [komut, setKomut] = useState('');
   const [usbDevices, setUsbDevices] = useState<string>('');
   const [repairResult, setRepairResult] = useState<string>('');
@@ -56,6 +56,8 @@ export default function App() {
   const [usbDst, setUsbDst] = useState('');
   const [fsDevice, setFsDevice] = useState('');
   const [fsScanPath, setFsScanPath] = useState('');
+  const [guvenlikSonuc, setGuvenlikSonuc] = useState<string>('');
+  const [protectionAcik, setProtectionAcik] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -148,6 +150,111 @@ export default function App() {
       const d = await r.json();
       setScanResult(d.scan !== undefined ? d.scan : ('Hata: ' + d.error));
     } catch (e) { setScanResult('Hata: ' + String(e)); }
+  };
+
+  const guvenlikListesi = async () => {
+    try {
+      const r = await fetch('/api/camera/list');
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.cameras === 'string' ? d.cameras : JSON.stringify(d.cameras));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const mikrofonTani = async () => {
+    try {
+      const r = await fetch('/api/mic/diagnose', { method: 'POST' });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.diagnose === 'string' ? d.diagnose : JSON.stringify(d.diagnose));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const mikrofonOnar = async () => {
+    try {
+      const r = await fetch('/api/mic/repair', { method: 'POST' });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.repaired === 'string' ? d.repaired : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const avTara = async () => {
+    try {
+      const r = await fetch('/api/av/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fsScanPath }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.scan === 'string' ? d.scan : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const avKarantina = async () => {
+    try {
+      const r = await fetch('/api/av/quarantine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fsScanPath }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.quarantined === 'string' ? d.quarantined : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const avKarantinaListe = async () => {
+    try {
+      const r = await fetch('/api/av/quarantine-list');
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.quarantined === 'string' ? d.quarantined : JSON.stringify(d.quarantined));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const preScan = async () => {
+    try {
+      const r = await fetch('/api/pre-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fsScanPath }),
+      });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.prescan === 'string' ? d.prescan : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const protectionToggle = async () => {
+    try {
+      const r = await fetch('/api/protection/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ on: !protectionAcik }),
+      });
+      const d = await r.json();
+      setProtectionAcik(!protectionAcik);
+      setGuvenlikSonuc(typeof d.toggled === 'string' ? d.toggled : ('Koruma ' + (protectionAcik ? 'kapatildi' : 'acildi')));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const selfAnalyze = async () => {
+    try {
+      const r = await fetch('/api/self/analyze', { method: 'POST' });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.analysis === 'string' ? d.analysis : JSON.stringify(d.analysis));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const selfApply = async () => {
+    try {
+      const r = await fetch('/api/self/apply', { method: 'POST' });
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.applied === 'string' ? d.applied : ('Hata: ' + d.error));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
+  };
+
+  const protectionDurum = async () => {
+    try {
+      const r = await fetch('/api/protection/status');
+      const d = await r.json();
+      setGuvenlikSonuc(typeof d.status === 'string' ? d.status : JSON.stringify(d.status));
+    } catch (e) { setGuvenlikSonuc('Hata: ' + String(e)); }
   };
 
   useEffect(() => {
@@ -251,8 +358,10 @@ export default function App() {
       startCamera();
     } else if (k.includes('ses aç') || k.includes('sesli mod')) {
       setMod('ses');
-    } else if (k.includes('siber mod') || k.includes('güvenlik')) {
+    }     else if (k.includes('siber mod')) {
       setMod('siber');
+    } else if (k.includes('guvenlik modu') || k.includes('guvenlik')) {
+      setMod('guvenlik');
     } else if (k.includes('sohbet')) {
       setMod('sohbet');
     }
@@ -299,6 +408,7 @@ export default function App() {
             <button className={`mod-buton-kucuk ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️</button>
             <button className={`mod-buton-kucuk ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => setMod('kamera')}>📷</button>
             <button className={`mod-buton-kucuk ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧</button>
+            <button className={`mod-buton-kucuk ${mod === 'guvenlik' ? 'aktif' : ''}`} onClick={() => setMod('guvenlik')}>🛡️</button>
           </div>
         </div>
       </header>
@@ -347,6 +457,7 @@ export default function App() {
               <button className={`mod-buton ${mod === 'siber' ? 'aktif' : ''}`} onClick={() => setMod('siber')}>🛡️ SİBER</button>
               <button className={`mod-buton ${mod === 'kamera' ? 'aktif' : ''}`} onClick={() => { setMod('kamera'); startCamera(); }}>📷 KAMERA</button>
               <button className={`mod-buton ${mod === 'tamir' ? 'aktif' : ''}`} onClick={() => setMod('tamir')}>🔧 TAMIR</button>
+              <button className={`mod-buton ${mod === 'guvenlik' ? 'aktif' : ''}`} onClick={() => setMod('guvenlik')}>🛡️ GÜVENLİK</button>
             </div>
           </section>
         </aside>
@@ -414,6 +525,29 @@ export default function App() {
               </section>
             </>
           )}
+        {mod === 'guvenlik' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">GÜVENLİK MODU</div>
+            <div className="hud-kucuk-yazi">Kamera ve Mikrofon</div>
+            <button className="hud-buton" onClick={guvenlikListesi}>Kamera Listesi</button>
+            <button className="hud-buton vurgulu" onClick={mikrofonTani}>Mikrofon Tanıla</button>
+            <button className="hud-buton vurgulu" onClick={mikrofonOnar}>Mikrofon Onar</button>
+            <div className="hud-kucuk-yazi">Antivirüs</div>
+            <button className="hud-buton" onClick={avTara}>Tarama Başlat</button>
+            <button className="hud-buton" onClick={preScan}>Yükleme Öncesi Tara</button>
+            <button className="hud-buton" onClick={avKarantina}>Karantinaya Al</button>
+            <button className="hud-buton" onClick={avKarantinaListe}>Karantina Liste</button>
+            <div className="hud-kucuk-yazi">Koruma Modu</div>
+            <button className="hud-buton vurgulu" onClick={protectionDurum}>Durum</button>
+            <button className="hud-buton vurgulu" onClick={protectionToggle}>
+              {protectionAcik ? 'Korumayı Kapat' : 'Korumayı Aç'}
+            </button>
+            <div className="hud-kucuk-yazi">Self-İyileştirme</div>
+            <button className="hud-buton" onClick={selfAnalyze}>Kodu Analiz Et</button>
+            <button className="hud-buton vurgulu" onClick={selfApply}>Güvenli Düzeltmeleri Uygula</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
         </aside>
       </main>
 
