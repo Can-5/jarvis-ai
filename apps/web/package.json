@@ -11,6 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@jarjs/shared": "../packages/shared",
+    "@jarvis/shared": "file:../../packages/shared",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",

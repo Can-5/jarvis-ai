@@ -47,7 +47,7 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz' | 'sunumcu' | 'tasarimci' | 'cocuk' | 'yetiskin' | 'uretici' | 'tuketici' | 'sanatci' | 'muzikci' | 'doktor' | 'avukat' | 'programci' | 'seyahatci' | 'filosof' | 'cocuk_az_bilen' | 'oyuncu' | 'savci' | 'kod_bilmeyen' | 'siyasetci' | 'zengin' | 'fakir'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz' | 'sunumcu' | 'tasarimci' | 'cocuk' | 'yetiskin' | 'uretici' | 'tuketici' | 'sanatci' | 'muzikci' | 'doktor' | 'avukat' | 'programci' | 'seyahatci' | 'filosof' | 'cocuk_az_bilen' | 'oyuncu' | 'savci' | 'kod_bilmeyen' | 'siyasetci' | 'zengin' | 'fakir' | 'rapci_icerik_uretici' | 'site_uretici' | 'normal_adam' | 'yasli' | 'genc' | 'google_veri_toplayan' | 'linux_bilmeyen'>('sohbet');
   const [komut, setKomut] = useState('');
   const [usbDevices, setUsbDevices] = useState<string>('');
   const [repairResult, setRepairResult] = useState<string>('');
@@ -495,6 +495,20 @@ export default function App() {
       setMod('zengin');
     } else if (k.includes('fakir')) {
       setMod('fakir');
+    } else if (k.includes('rapci') || k.includes('rap')) {
+      setMod('rapci_icerik_uretici');
+    } else if (k.includes('site') || k.includes('uretic')) {
+      setMod('site_uretici');
+    } else if (k.includes('normal_adam') || k.includes('normal adam') || k.includes('normalbiri')) {
+      setMod('normal_adam');
+    } else if (k.includes('yasli') || k.includes('yaşlı') || k.includes('yasli adam')) {
+      setMod('yasli');
+    } else if (k.includes('genc') || k.includes('genç')) {
+      setMod('genc');
+    } else if (k.includes('google') || k.includes('veri toplayan')) {
+      setMod('google_veri_toplayan');
+    } else if (k.includes('linux_bilmeyen') || k.includes('linux bilmeyen') || k.includes('linux u bilmeyen')) {
+      setMod('linux_bilmeyen');
     }
     setKomut('');
   };
@@ -577,6 +591,13 @@ export default function App() {
             <button className={`mod-buton-kucuk ${mod === 'siyasetci' ? 'aktif' : ''}`} onClick={() => setMod('siyasetci')}>🗳️</button>
             <button className={`mod-buton-kucuk ${mod === 'zengin' ? 'aktif' : ''}`} onClick={() => setMod('zengin')}>💎</button>
             <button className={`mod-buton-kucuk ${mod === 'fakir' ? 'aktif' : ''}`} onClick={() => setMod('fakir')}>💸</button>
+            <button className={`mod-buton-kucuk ${mod === 'rapci_icerik_uretici' ? 'aktif' : ''}`} onClick={() => setMod('rapci_icerik_uretici')}>🎤</button>
+            <button className={`mod-buton-kucuk ${mod === 'site_uretici' ? 'aktif' : ''}`} onClick={() => setMod('site_uretici')}>🌐</button>
+            <button className={`mod-buton-kucuk ${mod === 'normal_adam' ? 'aktif' : ''}`} onClick={() => setMod('normal_adam')}>👤</button>
+            <button className={`mod-buton-kucuk ${mod === 'yasli' ? 'aktif' : ''}`} onClick={() => setMod('yasli')}>👴</button>
+            <button className={`mod-buton-kucuk ${mod === 'genc' ? 'aktif' : ''}`} onClick={() => setMod('genc')}>👦</button>
+            <button className={`mod-buton-kucuk ${mod === 'google_veri_toplayan' ? 'aktif' : ''}`} onClick={() => setMod('google_veri_toplayan')}>🔍</button>
+            <button className={`mod-buton-kucuk ${mod === 'linux_bilmeyen' ? 'aktif' : ''}`} onClick={() => setMod('linux_bilmeyen')}>🐧</button>
           </div>
         </div>
       </header>
@@ -651,6 +672,13 @@ export default function App() {
               <button className={`mod-buton ${mod === 'siyasetci' ? 'aktif' : ''}`} onClick={() => setMod('siyasetci')}>🗳️ SİYASETCİ</button>
               <button className={`mod-buton ${mod === 'zengin' ? 'aktif' : ''}`} onClick={() => setMod('zengin')}>💎 ZENGİN</button>
               <button className={`mod-buton ${mod === 'fakir' ? 'aktif' : ''}`} onClick={() => setMod('fakir')}>💸 FAKİR</button>
+              <button className={`mod-buton ${mod === 'rapci_icerik_uretici' ? 'aktif' : ''}`} onClick={() => setMod('rapci_icerik_uretici')}>🎤 RAPÇI</button>
+              <button className={`mod-buton ${mod === 'site_uretici' ? 'aktif' : ''}`} onClick={() => setMod('site_uretici')}>🌐 SITE</button>
+              <button className={`mod-buton ${mod === 'normal_adam' ? 'aktif' : ''}`} onClick={() => setMod('normal_adam')}>👤 NORMAL</button>
+              <button className={`mod-buton ${mod === 'yasli' ? 'aktif' : ''}`} onClick={() => setMod('yasli')}>👴 YAŞLI</button>
+              <button className={`mod-buton ${mod === 'genc' ? 'aktif' : ''}`} onClick={() => setMod('genc')}>👦 GENÇ</button>
+              <button className={`mod-buton ${mod === 'google_veri_toplayan' ? 'aktif' : ''}`} onClick={() => setMod('google_veri_toplayan')}>🔍 GOOGLE</button>
+              <button className={`mod-buton ${mod === 'linux_bilmeyen' ? 'aktif' : ''}`} onClick={() => setMod('linux_bilmeyen')}>🐧 LINUX</button>
             </div>
           </section>
         </aside>
@@ -951,6 +979,62 @@ export default function App() {
             <div className="hud-panel-baslik">FAKİR</div>
             <div className="hud-kucuk-yazi">Masraf azaltma, yardim, dusuk bütce yasam</div>
             <button className="hud-buton" onClick={() => setGuvenlikSonuc('Fakir modu aktif. Tasarruf oneri hazir.')}>Tasarruf Öneri</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'rapci_icerik_uretici' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">RAPÇI İÇERİK ÜRETİCİ</div>
+            <div className="hud-kucuk-yazi">Söz, ritim, içerik üretimi, ses</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Rapçı modu aktif. Söz ve ritim önerisi hazir.')}>Söz Üret</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'site_uretici' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">SITE ÜRETİCİ</div>
+            <div className="hud-kucuk-yazi">Web sitesi tasarim, icerik olusturma, tema secimi</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Site uretici modu aktif. Site tasarim hazir.')}>Site Tasar</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'normal_adam' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">NORMAL ADAM</div>
+            <div className="hud-kucuk-yazi">Gunluk yasam, basit ve sade konusma, teknik bilgi yok</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Normal adam modu aktif. Basit soz hazir.')}>Konus</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'yasli' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">YAŞLI</div>
+            <div className="hud-kucuk-yazi">Deneyimli, bilge, yavas ve samimi konusma</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Yasli modu aktif. Deneyim hazir.')}>Konus</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'genc' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">GENÇ</div>
+            <div className="hud-kucuk-yazi">Enerjik, modern, sosyal medya dili, trend takibi</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Genç modu aktif. Enerjik konus hazir.')}>Konus</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'google_veri_toplayan' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">GOOGLE VERİ TOPLAYAN</div>
+            <div className="hud-kucuk-yazi">Arastirma, veri birlestirme, kaynak gosterme</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Google veri toplayan modu aktif. Arastirma hazir.')}>Ara</button>
+            {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
+          </section>
+        ) : null}
+        {mod === 'linux_bilmeyen' ? (
+          <section className="hud-panel">
+            <div className="hud-panel-baslik">LINUX BİLMEYEN</div>
+            <div className="hud-kucuk-yazi">Terminal bilmiyor, arayuze bagli, teknik detay yok</div>
+            <button className="hud-buton" onClick={() => setGuvenlikSonuc('Linux bilmeyen modu aktif. Arayuz konus hazir.')}>Konus</button>
             {guvenlikSonuc && <div className="hud-kucuk-yazi" style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>{guvenlikSonuc}</div>}
           </section>
         ) : null}
