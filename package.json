@@ -20,6 +20,7 @@
     "appId": "com.jarvis.ai",
     "productName": "JARVIS",
     "copyright": "Copyright © 2026",
+    "asar": true,
     "directories": {
       "output": "release"
     },
@@ -28,13 +29,35 @@
       "electron/preload.cjs",
       "apps/server/dist/**/*",
       "apps/web/dist/**/*",
-      "apps/voice/**/*",
+      "apps/voice/app/**/*",
+      "apps/voice/pyproject.toml",
+      "apps/voice/README.md",
       "packages/**/dist/**/*",
-      "node_modules/**/*",
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/fastify/**/*",
+      "node_modules/@fastify/**/*",
+      "node_modules/zod/**/*",
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*",
+      "node_modules/node-gyp-build/**/*",
       "data/**/*",
       "bin/**/*",
       "systemd/**/*",
-      "skills/**/*"
+      "skills/**/*",
+      "!node_modules/electron/**/*",
+      "!node_modules/app-builder-bin/**/*",
+      "!node_modules/.bin/**/*",
+      "!node_modules/.cache/**/*",
+      "!apps/voice/.venv/**/*",
+      "!apps/voice/**/__pycache__/**/*",
+      "!**/*.map",
+      "!**/test/**/*",
+      "!**/tests/**/*",
+      "!**/*.d.ts"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
     ],
     "extraMetadata": {
       "main": "electron/main.cjs"
