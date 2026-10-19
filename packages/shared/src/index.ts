@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 export const Tier = z.enum(['L1', 'L2', 'L3', 'L4', 'L5', 'L6']);
 export type Tier = z.infer<typeof Tier>;
 
-export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik', 'veri_studyo', 'sistem_izleme', 'kamera_analiz', 'ses_analiz', 'veri_analiz', 'sunumcu', 'tasarimci', 'cocuk', 'yetiskin', 'uretici', 'tuketici', 'sanatci', 'muzikci', 'doktor', 'avukat', 'programci', 'seyahatci', 'filosof', 'cocuk_az_bilen', 'oyuncu', 'savci', 'kod_bilmeyen', 'siyasetci', 'zengin', 'fakir', 'rapci_icerik_uretici', 'site_uretici', 'normal_adam', 'yasli', 'genc', 'google_veri_toplayan', 'linux_bilmeyen']);
+export const BadgeId = z.enum(['chat', 'ses', 'kod', 'arastirma', 'siber', 'ogretmen', 'yazar', 'planlayici', 'tamir', 'guvenlik', 'veri_studyo', 'sistem_izleme', 'kamera_analiz', 'ses_analiz', 'veri_analiz', 'sunumcu', 'tasarimci', 'cocuk', 'yetiskin', 'uretici', 'tuketici', 'sanatci', 'muzikci', 'doktor', 'avukat', 'programci', 'seyahatci', 'filosof', 'cocuk_az_bilen', 'oyuncu', 'savci', 'kod_bilmeyen', 'siyasetci', 'zengin', 'fakir', 'rapci_icerik_uretici', 'site_uretici', 'normal_adam', 'yasli', 'genc', 'google_veri_toplayan', 'linux_bilmeyen', 'bluetooth', 'wifi', 'web', 'sistem', 'ses_komut']);
 export type BadgeId = z.infer<typeof BadgeId>;
 
 export const ProviderId = z.enum(['ollama', 'gemini', 'claude', 'openai', 'grok', 'openrouter']);

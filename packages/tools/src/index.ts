@@ -393,5 +393,127 @@ export function allTools(): ToolDef[] {
           return ok(JSON.stringify({ applied: false, changeType, file: base, reason: 'degisiklik gerekmedi' }));
         } catch (e) { return fail(String(e)); }
       } },
+
+    { name: 'bluetooth_list', tier: 'L1', danger: false, describe: 'eslestirilmis/bluetooth cihazlarini listeler. args: {}',
+      run: async () => {
+        if (MOCK) return ok(JSON.stringify([{ name: 'Mock BT', mac: '00:11:22:33:44:55', connected: false }]));
+        try {
+          const { stdout } = await exec('bluetoothctl', ['devices']);
+          return ok(stdout || 'cihaz yok');
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'bluetooth_scan', tier: 'L1', danger: false, describe: 'yakindaki bluetooth cihazlarini tarar (timeout sn). args: {durationSec}',
+      run: async (a) => {
+        if (MOCK) return ok(JSON.stringify([{ name: 'Mock BT Device', mac: 'AA:BB:CC:DD:EE:FF', rssi: -45 }]));
+        const dur = Number(a.durationSec ?? 5);
+        try {
+          await exec('bluetoothctl', ['scan', 'on'], { timeout: (dur + 2) * 1000 });
+          await new Promise((r) => setTimeout(r, dur * 1000));
+          await exec('bluetoothctl', ['scan', 'off']);
+          const { stdout } = await exec('bluetoothctl', ['devices']);
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'bluetooth_connect', tier: 'L2', danger: false, describe: 'bluetooth cihaza baglanir. args: {mac}',
+      run: async (a) => {
+        if (MOCK) return ok('baglandi (mock)');
+        try {
+          const { stdout, stderr } = await exec('bluetoothctl', ['connect', str(a.mac, 'mac')]);
+          return ok((stdout + stderr).slice(0, 2000));
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'bluetooth_disconnect', tier: 'L2', danger: false, describe: 'bluetooth cihaz baglantisini keser. args: {mac}',
+      run: async (a) => {
+        if (MOCK) return ok('kesildi (mock)');
+        try {
+          const { stdout, stderr } = await exec('bluetoothctl', ['disconnect', str(a.mac, 'mac')]);
+          return ok((stdout + stderr).slice(0, 2000));
+        } catch (e) { return fail(String(e)); }
+      } },
+
+    { name: 'wifi_list', tier: 'L1', danger: false, describe: 'kayitli wifi aglarini listeler. args: {}',
+      run: async () => {
+        if (MOCK) return ok(JSON.stringify([{ ssid: 'MockWifi', signal: 80, security: 'WPA2' }]));
+        try {
+          const { stdout } = await exec('nmcli', ['-t', '-f', 'SSID,SIGNAL,SECURITY', 'device', 'wifi', 'list']);
+          return ok(stdout || 'ag yok');
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'wifi_scan', tier: 'L1', danger: false, describe: 'yakindaki wifi aglarini tarar. args: {}',
+      run: async () => {
+        if (MOCK) return ok(JSON.stringify([{ ssid: 'MockWifi1', signal: 90 }, { ssid: 'MockWifi2', signal: 60 }]));
+        try {
+          await exec('nmcli', ['device', 'wifi', 'rescan']);
+          const { stdout } = await exec('nmcli', ['-t', '-f', 'SSID,SIGNAL,SECURITY', 'device', 'wifi', 'list']);
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'wifi_connect', tier: 'L2', danger: false, describe: 'wifi agina baglanir. args: {ssid, password}',
+      run: async (a) => {
+        if (MOCK) return ok('baglandi (mock)');
+        const ssid = str(a.ssid, 'ssid');
+        const pw = a.password ? str(a.password, 'password') : '';
+        try {
+          const args = pw ? ['device', 'wifi', 'connect', ssid, 'password', pw] : ['device', 'wifi', 'connect', ssid];
+          const { stdout, stderr } = await exec('nmcli', args);
+          return ok((stdout + stderr).slice(0, 2000));
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'wifi_disconnect', tier: 'L2', danger: false, describe: 'wifi baglantisini keser. args: {}',
+      run: async () => {
+        if (MOCK) return ok('kesildi (mock)');
+        try {
+          const { stdout, stderr } = await exec('nmcli', ['device', 'disconnect', 'wlan0']);
+          return ok((stdout + stderr).slice(0, 2000));
+        } catch (e) { return fail(String(e)); }
+      } },
+    { name: 'wifi_status', tier: 'L1', danger: false, describe: 'wifi baglanti durumunu dondurur. args: {}',
+      run: async () => {
+        if (MOCK) return ok(JSON.stringify({ connected: true, ssid: 'MockWifi', ip: '192.168.1.100' }));
+        try {
+          const { stdout } = await exec('nmcli', ['-t', '-f', 'DEVICE,STATE,CONNECTION', 'device', 'status']);
+          return ok(stdout);
+        } catch (e) { return fail(String(e)); }
+      } },
+
+    { name: 'wake_word', tier: 'L1', danger: false, describe: 'uyandirma kelimesini ayarlar veya durumunu dondurur. args: {word, enabled}',
+      run: async (a) => {
+        const word = (a.word as string) ?? 'jarvis';
+        const enabled = a.enabled !== false;
+        return ok(JSON.stringify({ wakeWord: word, enabled, status: enabled ? 'aktif' : 'kapali' }));
+      } },
+    { name: 'vad', tier: 'L1', danger: false, describe: 'ses aktivite algilama (VAD) durumunu dondurur. args: {enabled, threshold}',
+      run: async (a) => {
+        const enabled = a.enabled !== false;
+        const threshold = Number(a.threshold ?? 0.5);
+        return ok(JSON.stringify({ vad: enabled, threshold, status: enabled ? 'aktif' : 'kapali' }));
+      } },
+
+    { name: 'system_stats', tier: 'L1', danger: false, describe: 'CPU, bellek, disk ve ag durumunu dondurur. args: {}',
+      run: async () => {
+        try {
+          const fs = await import('node:fs/promises');
+          let cpuPercent = 0;
+          try {
+            const stat = await fs.readFile('/proc/stat', 'utf8');
+            const cpuLine = stat.split('\n').find((l) => l.startsWith('cpu '));
+            if (cpuLine) {
+              const parts = cpuLine.split(/\s+/).slice(1).map(Number);
+              const total = parts.reduce((a, b) => a + b, 0);
+              const idle = parts[3] ?? 0;
+              cpuPercent = Math.round(((total - idle) / total) * 100);
+            }
+          } catch {}
+          let memTotal = 0, memFree = 0;
+          try {
+            const meminfo = await fs.readFile('/proc/meminfo', 'utf8');
+            const mt = meminfo.match(/MemTotal:\s+(\d+)/);
+            const ma = meminfo.match(/MemAvailable:\s+(\d+)/);
+            if (mt?.[1]) memTotal = parseInt(mt[1], 10);
+            if (ma?.[1]) memFree = parseInt(ma[1], 10);
+          } catch {}
+          return ok(JSON.stringify({ cpu: cpuPercent, memTotalMB: Math.round(memTotal / 1024), memFreeMB: Math.round(memFree / 1024), memUsedPercent: memTotal > 0 ? Math.round(((memTotal - memFree) / memTotal) * 100) : 0 }));
+        } catch (e) { return fail(String(e)); }
+      } },
   ];
 }

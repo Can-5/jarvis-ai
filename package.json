@@ -1,5 +1,8 @@
 {
   "name": "jarvis",
+  "version": "1.0.0",
+  "description": "JARVIS AI Assistant - sesli, yazili, kod yazabilen, bilgisayar kontrol edebilen asistan",
+  "author": "Can-5",
   "private": true,
   "type": "module",
   "workspaces": [

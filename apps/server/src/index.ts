@@ -103,6 +103,100 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
     return { ok: true, qrData: body.qrData, received: new Date().toISOString() };
   });
 
+  app.get('/api/bluetooth/list', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'bluetooth_list');
+    if (!tool) return { error: 'bluetooth_list toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { devices: result.output } : { error: result.output };
+  });
+
+  app.post('/api/bluetooth/scan', async (req) => {
+    const body = z.object({ durationSec: z.number().optional() }).parse(req.body ?? {});
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'bluetooth_scan');
+    if (!tool) return { error: 'bluetooth_scan toolu bulunamadi' };
+    const result = await tool.run({ durationSec: body.durationSec ?? 5 });
+    return result.ok ? { devices: result.output } : { error: result.output };
+  });
+
+  app.post('/api/bluetooth/connect', async (req) => {
+    const body = z.object({ mac: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'bluetooth_connect');
+    if (!tool) return { error: 'bluetooth_connect toolu bulunamadi' };
+    const result = await tool.run({ mac: body.mac });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.post('/api/bluetooth/disconnect', async (req) => {
+    const body = z.object({ mac: z.string() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'bluetooth_disconnect');
+    if (!tool) return { error: 'bluetooth_disconnect toolu bulunamadi' };
+    const result = await tool.run({ mac: body.mac });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.get('/api/wifi/list', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wifi_list');
+    if (!tool) return { error: 'wifi_list toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { networks: result.output } : { error: result.output };
+  });
+
+  app.post('/api/wifi/scan', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wifi_scan');
+    if (!tool) return { error: 'wifi_scan toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { networks: result.output } : { error: result.output };
+  });
+
+  app.post('/api/wifi/connect', async (req) => {
+    const body = z.object({ ssid: z.string(), password: z.string().optional() }).parse(req.body);
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wifi_connect');
+    if (!tool) return { error: 'wifi_connect toolu bulunamadi' };
+    const result = await tool.run({ ssid: body.ssid, password: body.password });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.post('/api/wifi/disconnect', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wifi_disconnect');
+    if (!tool) return { error: 'wifi_disconnect toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.get('/api/wifi/status', async () => {
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wifi_status');
+    if (!tool) return { error: 'wifi_status toolu bulunamadi' };
+    const result = await tool.run({});
+    return result.ok ? { status: result.output } : { error: result.output };
+  });
+
+  app.post('/api/wake-word', async (req) => {
+    const body = z.object({ word: z.string().optional(), enabled: z.boolean().optional() }).parse(req.body ?? {});
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'wake_word');
+    if (!tool) return { error: 'wake_word toolu bulunamadi' };
+    const result = await tool.run({ word: body.word ?? 'jarvis', enabled: body.enabled ?? true });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
+  app.post('/api/vad', async (req) => {
+    const body = z.object({ enabled: z.boolean().optional(), threshold: z.number().optional() }).parse(req.body ?? {});
+    const tools = allTools();
+    const tool = tools.find((t) => t.name === 'vad');
+    if (!tool) return { error: 'vad toolu bulunamadi' };
+    const result = await tool.run({ enabled: body.enabled ?? true, threshold: body.threshold ?? 0.5 });
+    return result.ok ? { ok: true, output: result.output } : { error: result.output };
+  });
+
   app.get('/api/usb/list', async () => {
     const tools = allTools();
     const tool = tools.find((t) => t.name === 'usb_list');

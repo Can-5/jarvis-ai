@@ -47,7 +47,7 @@ export default function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [photos, setPhotos] = useState<{ dataUrl: string; zaman: string }[]>([]);
   const [stats, setStats] = useState<{ cpu: number; memPercent: number; diskPercent: number } | null>(null);
-  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz' | 'sunumcu' | 'tasarimci' | 'cocuk' | 'yetiskin' | 'uretici' | 'tuketici' | 'sanatci' | 'muzikci' | 'doktor' | 'avukat' | 'programci' | 'seyahatci' | 'filosof' | 'cocuk_az_bilen' | 'oyuncu' | 'savci' | 'kod_bilmeyen' | 'siyasetci' | 'zengin' | 'fakir' | 'rapci_icerik_uretici' | 'site_uretici' | 'normal_adam' | 'yasli' | 'genc' | 'google_veri_toplayan' | 'linux_bilmeyen'>('sohbet');
+  const [mod, setMod] = useState<'sohbet' | 'ses' | 'siber' | 'kamera' | 'tamir' | 'guvenlik' | 'veri_studyo' | 'sistem_izleme' | 'kamera_analiz' | 'ses_analiz' | 'veri_analiz' | 'sunumcu' | 'tasarimci' | 'cocuk' | 'yetiskin' | 'uretici' | 'tuketici' | 'sanatci' | 'muzikci' | 'doktor' | 'avukat' | 'programci' | 'seyahatci' | 'filosof' | 'cocuk_az_bilen' | 'oyuncu' | 'savci' | 'kod_bilmeyen' | 'siyasetci' | 'zengin' | 'fakir' | 'rapci_icerik_uretici' | 'site_uretici' | 'normal_adam' | 'yasli' | 'genc' | 'google_veri_toplayan' | 'linux_bilmeyen' | 'bluetooth' | 'wifi' | 'web' | 'sistem' | 'ses_komut'>('sohbet');
   const [komut, setKomut] = useState('');
   const [usbDevices, setUsbDevices] = useState<string>('');
   const [repairResult, setRepairResult] = useState<string>('');
@@ -679,6 +679,11 @@ export default function App() {
               <button className={`mod-buton ${mod === 'genc' ? 'aktif' : ''}`} onClick={() => setMod('genc')}>👦 GENÇ</button>
               <button className={`mod-buton ${mod === 'google_veri_toplayan' ? 'aktif' : ''}`} onClick={() => setMod('google_veri_toplayan')}>🔍 GOOGLE</button>
               <button className={`mod-buton ${mod === 'linux_bilmeyen' ? 'aktif' : ''}`} onClick={() => setMod('linux_bilmeyen')}>🐧 LINUX</button>
+              <button className={`mod-buton ${mod === 'bluetooth' ? 'aktif' : ''}`} onClick={() => setMod('bluetooth')}>📶 BLUETOOTH</button>
+              <button className={`mod-buton ${mod === 'wifi' ? 'aktif' : ''}`} onClick={() => setMod('wifi')}>📡 WIFI</button>
+              <button className={`mod-buton ${mod === 'web' ? 'aktif' : ''}`} onClick={() => setMod('web')}>🌐 WEB</button>
+              <button className={`mod-buton ${mod === 'sistem' ? 'aktif' : ''}`} onClick={() => setMod('sistem')}>💻 SİSTEM</button>
+              <button className={`mod-buton ${mod === 'ses_komut' ? 'aktif' : ''}`} onClick={() => setMod('ses_komut')}>🎤 SES KOMUT</button>
             </div>
           </section>
         </aside>
