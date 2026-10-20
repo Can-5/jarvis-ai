@@ -19,12 +19,14 @@ jobs:
       - name: Build all packages
         run: |
           npm run build -w packages/shared
+          npm run build -w packages/guard
           npm run build -w packages/tools
+          npm run build -w packages/llm
           npm run build -w packages/agent-core
           npm run build -w apps/server
           npm run build -w apps/web
       - name: Build AppImage
-        run: npx electron-builder --linux AppImage
+        run: npx electron-builder --linux AppImage --config.npmRebuild=false
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
         with:
@@ -43,12 +45,14 @@ jobs:
       - name: Build all packages
         run: |
           npm run build -w packages/shared
+          npm run build -w packages/guard
           npm run build -w packages/tools
+          npm run build -w packages/llm
           npm run build -w packages/agent-core
           npm run build -w apps/server
           npm run build -w apps/web
       - name: Build Windows installer
-        run: npx electron-builder --win nsis
+        run: npx electron-builder --win nsis --config.npmRebuild=false
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:

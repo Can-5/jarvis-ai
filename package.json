@@ -21,6 +21,7 @@
     "productName": "JARVIS",
     "copyright": "Copyright © 2026",
     "asar": true,
+    "npmRebuild": false,
     "directories": {
       "output": "release"
     },
@@ -45,6 +46,7 @@
       "bin/**/*",
       "systemd/**/*",
       "skills/**/*",
+      "!node_modules/@jarjs/**/*",
       "!node_modules/electron/**/*",
       "!node_modules/app-builder-bin/**/*",
       "!node_modules/.bin/**/*",
