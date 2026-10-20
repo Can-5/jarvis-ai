@@ -1,0 +1,70 @@
+name: Build JARVIS
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Build all packages
+        run: |
+          npm run build -w packages/shared
+          npm run build -w packages/tools
+          npm run build -w packages/agent-core
+          npm run build -w apps/server
+          npm run build -w apps/web
+      - name: Build AppImage
+        run: npx electron-builder --linux AppImage
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-linux
+          path: release/*.AppImage
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Build all packages
+        run: |
+          npm run build -w packages/shared
+          npm run build -w packages/tools
+          npm run build -w packages/agent-core
+          npm run build -w apps/server
+          npm run build -w apps/web
+      - name: Build Windows installer
+        run: npx electron-builder --win nsis
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-windows
+          path: release/*.exe
+
+  release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            JARVIS-linux/*.AppImage
+            JARVIS-windows/*.exe
