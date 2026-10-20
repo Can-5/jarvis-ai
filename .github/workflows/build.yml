@@ -26,7 +26,7 @@ jobs:
           npm run build -w apps/server
           npm run build -w apps/web
       - name: Build AppImage
-        run: npx electron-builder --linux AppImage --config.npmRebuild=false
+        run: npx electron-builder --linux AppImage --config.npmRebuild=false --publish never
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
         with:
@@ -52,7 +52,7 @@ jobs:
           npm run build -w apps/server
           npm run build -w apps/web
       - name: Build Windows installer
-        run: npx electron-builder --win nsis --config.npmRebuild=false
+        run: npx electron-builder --win nsis --config.npmRebuild=false --publish never
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
