@@ -47,3 +47,6 @@ export async function rollback(wsDir: string, hash: string): Promise<void> {
   await git(wsDir, ['reset', '--hard', hash]);
   await git(wsDir, ['clean', '-fd']);
 }
+
+export { scanText, isSafe, ATTACK_PATTERNS } from "./foxguard.js";
+export type { AttackLevel, ScanResult } from "./foxguard.js";

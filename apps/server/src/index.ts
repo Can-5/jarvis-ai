@@ -12,6 +12,7 @@ import { BadgeId, ChatMessage, Kisisilik, RuhHali, dataDir, type ProviderId } fr
 import { KeyStore, complete as realComplete, detectOllama } from '@jarvis/llm';
 import { runTurn, Memory } from '@jarvis/agent-core';
 import { allTools } from '@jarvis/tools';
+import { scanText } from '@jarvis/guard';
 import { telegramBot, type TelegramBotAdapter } from './telegram.js';
 
 const VOICE = (): string => process.env.JARVIS_VOICE_URL ?? 'http://localhost:8765';
@@ -413,6 +414,10 @@ export async function build(deps?: { llm?: { complete: typeof realComplete } }):
 
   app.post('/api/chat', async (req) => {
     const body = z.object({ conv: z.string(), text: z.string(), badges: BadgeId.array().default(['chat']), imageUrl: z.string().optional(), vision: z.boolean().optional() }).parse(req.body);
+    const scan = scanText(body.text);
+    if (!scan.safe) {
+      return { reply: `FoxGuard: giriş engellendi (${scan.level}) — ${scan.reason}`, approvals: [] };
+    }
     const history = mem.lastMessages(body.conv, 6).map((m) => `${m.role}: ${m.content}`);
     void history;
     const db = settingsDb();
